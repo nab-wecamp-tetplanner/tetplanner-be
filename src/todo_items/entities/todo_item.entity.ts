@@ -1,5 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, DeleteDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { TodoPriority, TodoStatus } from '../../helper/enums';
+import { TetConfig } from '../../tet_configs/entities/tet_config.entity';
+import { TimelinePhase } from '../../timeline_phases/entities/timeline_phase.entity';
+import { Category } from '../../categories/entities/category.entity';
+import { User } from '../../users/entities/user.entity';
+import { BudgetTransaction } from '../../budget_transactions/entities/budget_transaction.entity';
+import { Notification } from '../../notifications/entities/notification.entity';
 
 @Entity('todo_items')
 export class TodoItem {
@@ -39,14 +45,29 @@ export class TodoItem {
   @CreateDateColumn()
   created_at: Date;
 
+  @DeleteDateColumn()
+  deleted_at: Date;
+
   // relationships => 3
+  @ManyToOne(() => TetConfig, (tetConfig) => tetConfig.todoItems)
+  @JoinColumn({ name: 'tet_config_id' })
+  tetConfig: TetConfig;
 
-  @Column('uuid')
-  tet_config_id: string;
+  @ManyToOne(() => TimelinePhase, (phase) => phase.todoItems)
+  @JoinColumn({ name: 'timeline_phase_id' })
+  timelinePhase: TimelinePhase;
 
-  @Column('uuid')
-  timeline_phase_id: string;
+  @ManyToOne(() => Category, (category) => category.todoItems)
+  @JoinColumn({ name: 'category_id' })
+  category: Category;
 
-  @Column('uuid')
-  category_id: string;
+  @ManyToOne(() => User, (user) => user.assignedTodoItems, { nullable: true })
+  @JoinColumn({ name: 'assigned_to' })
+  assignedToUser: User;
+
+  @OneToMany(() => BudgetTransaction, (transaction) => transaction.todoItem)
+  budgetTransactions: BudgetTransaction[];
+
+  @OneToMany(() => Notification, (notification) => notification.todoItem, { cascade: ['remove'] })
+  notifications: Notification[];
 }

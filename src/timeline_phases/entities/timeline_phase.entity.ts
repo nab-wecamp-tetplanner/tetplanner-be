@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { TetConfig } from '../../tet_configs/entities/tet_config.entity';
+import { TodoItem } from '../../todo_items/entities/todo_item.entity';
 
 @Entity('timeline_phases')
 export class TimelinePhase {
@@ -18,6 +20,10 @@ export class TimelinePhase {
   display_order: number;
 
   // relationships => 1
-  @Column('uuid')
-  tet_config_id: string;
+  @ManyToOne(() => TetConfig, (tetConfig) => tetConfig.timelinePhases)
+  @JoinColumn({ name: 'tet_config_id' })
+  tetConfig: TetConfig;
+
+  @OneToMany(() => TodoItem, (todoItem) => todoItem.timelinePhase, { cascade: ['remove'] })
+  todoItems: TodoItem[];
 }

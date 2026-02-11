@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+import { TodoItem } from '../../todo_items/entities/todo_item.entity';
 
 @Entity('notifications')
 export class Notification {
@@ -15,9 +17,11 @@ export class Notification {
   created_at: Date;
 
   // relationships => 2
-  @Column('uuid')
-  user_id: string;
+  @ManyToOne(() => User, (user) => user.notifications)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
-  @Column('uuid', { nullable: true })
-  todo_item_id: string;
+  @ManyToOne(() => TodoItem, (todoItem) => todoItem.notifications, { nullable: true })
+  @JoinColumn({ name: 'todo_item_id' })
+  todoItem: TodoItem;
 }

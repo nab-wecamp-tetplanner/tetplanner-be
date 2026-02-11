@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { CollaboratorRole } from '../../helper/enums';
+import { TetConfig } from '../../tet_configs/entities/tet_config.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('collaborators')
 export class Collaborator {
@@ -13,9 +15,11 @@ export class Collaborator {
   accepted_at: Date;
 
   // relationships => 2
-  @Column('uuid')
-  tet_config_id: string;
+  @ManyToOne(() => TetConfig, (tetConfig) => tetConfig.collaborators)
+  @JoinColumn({ name: 'tet_config_id' })
+  tetConfig: TetConfig;
 
-  @Column('uuid')
-  user_id: string;
+  @ManyToOne(() => User, (user) => user.collaborators)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }

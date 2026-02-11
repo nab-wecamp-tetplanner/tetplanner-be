@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, DeleteDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+import { Category } from '../../categories/entities/category.entity';
+import { TimelinePhase } from '../../timeline_phases/entities/timeline_phase.entity';
+import { TodoItem } from '../../todo_items/entities/todo_item.entity';
+import { BudgetTransaction } from '../../budget_transactions/entities/budget_transaction.entity';
+import { Collaborator } from '../../collaborators/entities/collaborator.entity';
 
 @Entity('tet_configs')
 export class TetConfig {
@@ -17,7 +23,26 @@ export class TetConfig {
   @CreateDateColumn()
   created_at: Date;
 
+  @DeleteDateColumn()
+  deleted_at: Date;
+
   // relationships => 1
-  @Column('uuid')
-  owner_id: string;
+  @ManyToOne(() => User, (user) => user.tetConfigs)
+  @JoinColumn({ name: 'owner_id' })
+  owner: User;
+
+  @OneToMany(() => Category, (category) => category.tetConfig, { cascade: ['remove'] })
+  categories: Category[];
+
+  @OneToMany(() => TimelinePhase, (phase) => phase.tetConfig, { cascade: ['remove'] })
+  timelinePhases: TimelinePhase[];
+
+  @OneToMany(() => TodoItem, (todo) => todo.tetConfig, { cascade: ['remove'] })
+  todoItems: TodoItem[];
+
+  @OneToMany(() => BudgetTransaction, (transaction) => transaction.tetConfig, { cascade: ['remove'] })
+  budgetTransactions: BudgetTransaction[];
+
+  @OneToMany(() => Collaborator, (collaborator) => collaborator.tetConfig, { cascade: ['remove'] })
+  collaborators: Collaborator[];
 }

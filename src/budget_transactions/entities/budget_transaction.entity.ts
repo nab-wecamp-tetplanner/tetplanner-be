@@ -1,5 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { TransactionType } from '../../helper/enums';
+import { TetConfig } from '../../tet_configs/entities/tet_config.entity';
+import { Category } from '../../categories/entities/category.entity';
+import { TodoItem } from '../../todo_items/entities/todo_item.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('budget_transactions')
 export class BudgetTransaction {
@@ -19,15 +23,19 @@ export class BudgetTransaction {
   transaction_date: Date;
 
   // relationships => 4
-  @Column('uuid')
-  tet_config_id: string;
+  @ManyToOne(() => TetConfig, (tetConfig) => tetConfig.budgetTransactions)
+  @JoinColumn({ name: 'tet_config_id' })
+  tetConfig: TetConfig;
 
-  @Column('uuid')
-  category_id: string;
+  @ManyToOne(() => Category, (category) => category.budgetTransactions)
+  @JoinColumn({ name: 'category_id' })
+  category: Category;
 
-  @Column('uuid', { nullable: true })
-  todo_item_id: string;
+  @ManyToOne(() => TodoItem, (todoItem) => todoItem.budgetTransactions, { nullable: true })
+  @JoinColumn({ name: 'todo_item_id' })
+  todoItem: TodoItem;
 
-  @Column('uuid')
-  recorded_by: string;
+  @ManyToOne(() => User, (user) => user.recordedTransactions)
+  @JoinColumn({ name: 'recorded_by' })
+  recordedByUser: User;
 }
