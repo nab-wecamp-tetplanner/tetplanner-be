@@ -26,8 +26,8 @@ export class User {
   deleted_at: Date;
 
   // Relations
-  @OneToMany(() => TetConfig, (tetConfig) => tetConfig.owner)
-  tetConfigs: TetConfig[];
+  @OneToMany(() => TetConfig, (tet_config) => tet_config.owner)
+  tet_configs: TetConfig[];
 
   @OneToMany(() => Collaborator, (collaborator) => collaborator.user, { cascade: ['remove'] })
   collaborators: Collaborator[];
@@ -35,9 +35,9 @@ export class User {
   @OneToMany(() => Notification, (notification) => notification.user, { cascade: ['remove'] })
   notifications: Notification[];
 
-  @OneToMany(() => TodoItem, (todoItem) => todoItem.assignedToUser)
-  assignedTodoItems: TodoItem[];
+  @OneToMany(() => TodoItem, (todo_item) => todo_item.assigned_to_user)
+  assigned_todo_items: TodoItem[];
 
-  @OneToMany(() => BudgetTransaction, (transaction) => transaction.recordedByUser)
-  recordedTransactions: BudgetTransaction[];
+  @OneToMany(() => BudgetTransaction, (transaction) => transaction.recorded_by_user)
+  recorded_transactions: BudgetTransaction[];
 }

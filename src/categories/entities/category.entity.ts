@@ -24,13 +24,13 @@ export class Category {
   deleted_at: Date;
 
   // relationships => 1
-  @ManyToOne(() => TetConfig, (tetConfig) => tetConfig.categories)
+  @ManyToOne(() => TetConfig, (tet_config) => tet_config.categories)
   @JoinColumn({ name: 'tet_config_id' })
-  tetConfig: TetConfig;
+  tet_config: TetConfig;
 
-  @OneToMany(() => TodoItem, (todoItem) => todoItem.category, { cascade: ['remove'] })
-  todoItems: TodoItem[];
+  @OneToMany(() => TodoItem, (todo_item) => todo_item.category, { cascade: ['remove'] })
+  todo_items: TodoItem[];
 
   @OneToMany(() => BudgetTransaction, (transaction) => transaction.category, { cascade: ['remove'] })
-  budgetTransactions: BudgetTransaction[];
+  budget_transactions: BudgetTransaction[];
 }

@@ -27,22 +27,22 @@ export class TetConfig {
   deleted_at: Date;
 
   // relationships => 1
-  @ManyToOne(() => User, (user) => user.tetConfigs)
+  @ManyToOne(() => User, (user) => user.tet_configs)
   @JoinColumn({ name: 'owner_id' })
   owner: User;
 
-  @OneToMany(() => Category, (category) => category.tetConfig, { cascade: ['remove'] })
+  @OneToMany(() => Category, (category) => category.tet_config, { cascade: ['remove'] })
   categories: Category[];
 
-  @OneToMany(() => TimelinePhase, (phase) => phase.tetConfig, { cascade: ['remove'] })
-  timelinePhases: TimelinePhase[];
+  @OneToMany(() => TimelinePhase, (phase) => phase.tet_config, { cascade: ['remove'] })
+  timeline_phases: TimelinePhase[];
 
-  @OneToMany(() => TodoItem, (todo) => todo.tetConfig, { cascade: ['remove'] })
-  todoItems: TodoItem[];
+  @OneToMany(() => TodoItem, (todo) => todo.tet_config, { cascade: ['remove'] })
+  todo_items: TodoItem[];
 
-  @OneToMany(() => BudgetTransaction, (transaction) => transaction.tetConfig, { cascade: ['remove'] })
-  budgetTransactions: BudgetTransaction[];
+  @OneToMany(() => BudgetTransaction, (transaction) => transaction.tet_config, { cascade: ['remove'] })
+  budget_transactions: BudgetTransaction[];
 
-  @OneToMany(() => Collaborator, (collaborator) => collaborator.tetConfig, { cascade: ['remove'] })
+  @OneToMany(() => Collaborator, (collaborator) => collaborator.tet_config, { cascade: ['remove'] })
   collaborators: Collaborator[];
 }

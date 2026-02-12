@@ -20,10 +20,10 @@ export class TimelinePhase {
   display_order: number;
 
   // relationships => 1
-  @ManyToOne(() => TetConfig, (tetConfig) => tetConfig.timelinePhases)
+  @ManyToOne(() => TetConfig, (tet_config) => tet_config.timeline_phases)
   @JoinColumn({ name: 'tet_config_id' })
-  tetConfig: TetConfig;
+  tet_config: TetConfig;
 
-  @OneToMany(() => TodoItem, (todoItem) => todoItem.timelinePhase, { cascade: ['remove'] })
-  todoItems: TodoItem[];
+  @OneToMany(() => TodoItem, (todo_item) => todo_item.timeline_phase, { cascade: ['remove'] })
+  todo_items: TodoItem[];
 }

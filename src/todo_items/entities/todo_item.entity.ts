@@ -49,25 +49,25 @@ export class TodoItem {
   deleted_at: Date;
 
   // relationships => 3
-  @ManyToOne(() => TetConfig, (tetConfig) => tetConfig.todoItems)
+  @ManyToOne(() => TetConfig, (tet_config) => tet_config.todo_items)
   @JoinColumn({ name: 'tet_config_id' })
-  tetConfig: TetConfig;
+  tet_config: TetConfig;
 
-  @ManyToOne(() => TimelinePhase, (phase) => phase.todoItems)
+  @ManyToOne(() => TimelinePhase, (phase) => phase.todo_items)
   @JoinColumn({ name: 'timeline_phase_id' })
-  timelinePhase: TimelinePhase;
+  timeline_phase: TimelinePhase;
 
-  @ManyToOne(() => Category, (category) => category.todoItems)
+  @ManyToOne(() => Category, (category) => category.todo_items)
   @JoinColumn({ name: 'category_id' })
   category: Category;
 
-  @ManyToOne(() => User, (user) => user.assignedTodoItems, { nullable: true })
+  @ManyToOne(() => User, (user) => user.assigned_todo_items, { nullable: true })
   @JoinColumn({ name: 'assigned_to' })
-  assignedToUser: User;
+  assigned_to_user: User;
 
-  @OneToMany(() => BudgetTransaction, (transaction) => transaction.todoItem)
-  budgetTransactions: BudgetTransaction[];
+  @OneToMany(() => BudgetTransaction, (transaction) => transaction.todo_item)
+  budget_transactions: BudgetTransaction[];
 
-  @OneToMany(() => Notification, (notification) => notification.todoItem, { cascade: ['remove'] })
+  @OneToMany(() => Notification, (notification) => notification.todo_item, { cascade: ['remove'] })
   notifications: Notification[];
 }

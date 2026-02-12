@@ -21,7 +21,7 @@ export class Notification {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => TodoItem, (todoItem) => todoItem.notifications, { nullable: true })
+  @ManyToOne(() => TodoItem, (todo_item) => todo_item.notifications, { nullable: true })
   @JoinColumn({ name: 'todo_item_id' })
-  todoItem: TodoItem;
+  todo_item: TodoItem;
 }

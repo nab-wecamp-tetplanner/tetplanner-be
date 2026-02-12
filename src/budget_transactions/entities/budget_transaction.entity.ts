@@ -23,19 +23,19 @@ export class BudgetTransaction {
   transaction_date: Date;
 
   // relationships => 4
-  @ManyToOne(() => TetConfig, (tetConfig) => tetConfig.budgetTransactions)
+  @ManyToOne(() => TetConfig, (tet_config) => tet_config.budget_transactions)
   @JoinColumn({ name: 'tet_config_id' })
-  tetConfig: TetConfig;
+  tet_config: TetConfig;
 
-  @ManyToOne(() => Category, (category) => category.budgetTransactions)
+  @ManyToOne(() => Category, (category) => category.budget_transactions)
   @JoinColumn({ name: 'category_id' })
   category: Category;
 
-  @ManyToOne(() => TodoItem, (todoItem) => todoItem.budgetTransactions, { nullable: true })
+  @ManyToOne(() => TodoItem, (todo_item) => todo_item.budget_transactions, { nullable: true })
   @JoinColumn({ name: 'todo_item_id' })
-  todoItem: TodoItem;
+  todo_item: TodoItem;
 
-  @ManyToOne(() => User, (user) => user.recordedTransactions)
+  @ManyToOne(() => User, (user) => user.recorded_transactions)
   @JoinColumn({ name: 'recorded_by' })
-  recordedByUser: User;
+  recorded_by_user: User;
 }

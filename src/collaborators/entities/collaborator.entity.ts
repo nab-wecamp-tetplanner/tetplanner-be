@@ -15,9 +15,9 @@ export class Collaborator {
   accepted_at: Date;
 
   // relationships => 2
-  @ManyToOne(() => TetConfig, (tetConfig) => tetConfig.collaborators)
+  @ManyToOne(() => TetConfig, (tet_config) => tet_config.collaborators)
   @JoinColumn({ name: 'tet_config_id' })
-  tetConfig: TetConfig;
+  tet_config: TetConfig;
 
   @ManyToOne(() => User, (user) => user.collaborators)
   @JoinColumn({ name: 'user_id' })
