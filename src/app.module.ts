@@ -14,6 +14,9 @@ import * as joi from 'joi';
 import configuration from './config/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from 'database/data-source';
+import { AuthModule } from './auth/auth.module';
+import { SupabaseStorageService } from './supabase-storage/supabase-storage.service';
+import { SupabaseStorageModule } from './supabase-storage/supabase-storage.module';
 
 @Module({
   imports: [
@@ -38,8 +41,10 @@ import { typeOrmConfig } from 'database/data-source';
     BudgetTransactionsModule,
     CollaboratorsModule,
     NotificationsModule,
+    AuthModule,
+    SupabaseStorageModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SupabaseStorageService],
 })
 export class AppModule {}

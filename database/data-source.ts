@@ -23,7 +23,7 @@ export const typeOrmConfig: TypeOrmModuleAsyncOptions = {
     entities: [User, TetConfig, Category, TimelinePhase, TodoItem, BudgetTransaction, Collaborator, Notification], // change later
     autoLoadEntities: true,
     migrations: [__dirname + '/../migrations/**/*{.ts,.js}'], // change later
-    synchronize: true,
+    synchronize: true, // only for development, disable in production and use migrations instead
   }),
 };
 // for cli
