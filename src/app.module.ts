@@ -14,6 +14,7 @@ import * as joi from 'joi';
 import configuration from './config/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from 'database/data-source';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { typeOrmConfig } from 'database/data-source';
     BudgetTransactionsModule,
     CollaboratorsModule,
     NotificationsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

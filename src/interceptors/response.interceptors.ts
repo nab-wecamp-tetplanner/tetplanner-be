@@ -10,10 +10,10 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, IBackendRes<T>
 
     return next.handle().pipe(
       map((data) => {
-        // // if the response is already wrapped with responseHelper, return as is
-        // if (data && typeof data === 'object' && 'statusCode' in data && 'message' in data) {
-        //   return data;
-        // }
+        // if the response is already wrapped with responseHelper, return as is
+        if (data && typeof data === 'object' && 'statusCode' in data && 'message' in data) {
+          return data;
+        }
 
         // otherwise, wrap it automatically
         return {
