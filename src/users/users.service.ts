@@ -1,26 +1,63 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { SupabaseStorageService } from '../supabase-storage/supabase-storage.service';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly storageService: SupabaseStorageService,
+  ) {}
+
+  async findById(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password_hash, ...result } = user;
+    return result;
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async update(userId: string, updateUserDto: UpdateUserDto) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    Object.assign(user, updateUserDto);
+    await this.userRepository.save(user);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password_hash, ...result } = user;
+    return result;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+  async uploadAvatar(userId: string, file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    const fileName = `${userId}-${Date.now()}-${file.originalname}`;
+    const bucketName = process.env.AVATAR_BUCKET_NAME || 'avatars';
+    const imageUrl = await this.storageService.uploadImageFromBuffer(file.buffer, fileName, bucketName);
+
+    if (!imageUrl) {
+      throw new BadRequestException('Failed to upload avatar');
+    }
+
+    user.image_url = imageUrl;
+    await this.userRepository.save(user);
+
+    return { message: 'Avatar uploaded successfully', image_url: imageUrl };
   }
 }

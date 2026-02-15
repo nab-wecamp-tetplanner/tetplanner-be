@@ -1,34 +1,41 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Body, Req, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
+@ApiTags('users')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Get('me')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'User profile returned' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getProfile(@Req() req: any) {
+    return this.usersService.findById(req.user.userId);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @Patch('me')
+  @ApiOperation({ summary: 'Update current user profile' })
+  @ApiResponse({ status: 200, description: 'Profile updated successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async updateProfile(@Req() req: any, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(req.user.userId, updateUserDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @Post('me/avatar')
+  @ApiOperation({ summary: 'Upload avatar image' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 200, description: 'Avatar uploaded successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid file' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadAvatar(@Req() req: any, @UploadedFile() file: Express.Multer.File) {
+    return this.usersService.uploadAvatar(req.user.userId, file);
   }
 }
