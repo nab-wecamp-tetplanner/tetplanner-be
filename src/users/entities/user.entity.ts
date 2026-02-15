@@ -22,6 +22,9 @@ export class User {
   @Column({ default: false })
   is_verified: boolean;
 
+  @Column({ nullable: true })
+  image_url: string;
+
   @CreateDateColumn()
   created_at: Date;
 
