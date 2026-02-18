@@ -39,9 +39,4 @@ export class CreateBudgetTransactionDto {
   @IsUUID('4')
   @IsOptional()
   todo_item_id?: string;
-
-  @ApiProperty({ type: String, description: 'Recorded by user ID' })
-  @IsUUID('4')
-  @IsNotEmpty()
-  recorded_by!: string;
 }
