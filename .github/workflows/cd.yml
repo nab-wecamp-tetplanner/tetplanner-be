@@ -1,0 +1,28 @@
+# .github/workflows/cd.yml
+name: CD
+
+on:
+    push:
+        branches: [main]
+
+jobs:
+    build:
+        name: Build check
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+            - run: npm ci
+            - run: npm run build
+
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        name: Deploy to Render
+        steps:
+            - name: Trigger Render deploy hook
+              run: curl -X POST "$RENDER_DEPLOY_HOOK"
+              env:
+                  RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
