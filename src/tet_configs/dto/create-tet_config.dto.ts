@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsNumber, IsString, IsUUID } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateTetConfigDto {
   @ApiProperty({ type: Number, description: 'Year of Tet celebration' })
@@ -16,9 +16,4 @@ export class CreateTetConfigDto {
   @IsNumber()
   @IsNotEmpty()
   total_budget!: number;
-
-  @ApiProperty({ type: String, description: 'Owner user ID' })
-  @IsUUID('4')
-  @IsNotEmpty()
-  owner_id!: string;
 }
