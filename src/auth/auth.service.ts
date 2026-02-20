@@ -2,7 +2,8 @@ import { Injectable, BadRequestException, ConflictException, UnauthorizedExcepti
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import * as nodemailer from 'nodemailer';
+// import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { User } from '../users/entities/user.entity';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { OtpService } from './otp/otp.service';
@@ -11,7 +12,8 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  private transporter: nodemailer.Transporter;
+  // private transporter: nodemailer.Transporter;
+  private resend = new Resend(process.env.RESEND_API_KEY);
 
   constructor(
     @InjectRepository(User)
@@ -19,15 +21,15 @@ export class AuthService {
     private readonly otpService: OtpService,
     private jwtService: JwtService,
   ) {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    // this.transporter = nodemailer.createTransport({
+    //   host: process.env.SMTP_HOST,
+    //   port: Number(process.env.SMTP_PORT),
+    //   secure: process.env.SMTP_SECURE === 'true',
+    //   auth: {
+    //     user: process.env.SMTP_USER,
+    //     pass: process.env.SMTP_PASS,
+    //   },
+    // });
   }
 
   private async sendVerificationEmail(email: string, otp: string, isReset: boolean) {
@@ -46,8 +48,8 @@ export class AuthService {
         <p>If you did not request, please ignore this email.</p>
       `;
 
-    await this.transporter.sendMail({
-      from: process.env.SMTP_FROM,
+    await this.resend.emails.send({
+      from: process.env.RESEND_FROM!,
       to: email,
       subject,
       html,
