@@ -2,7 +2,9 @@ import { Injectable, BadRequestException, ConflictException, UnauthorizedExcepti
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import * as nodemailer from 'nodemailer';
+// import * as nodemailer from 'nodemailer';
+// import { Resend } from 'resend';
+import { BrevoClient } from '@getbrevo/brevo';
 import { User } from '../users/entities/user.entity';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { OtpService } from './otp/otp.service';
@@ -11,7 +13,9 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  private transporter: nodemailer.Transporter;
+  // private transporter: nodemailer.Transporter;
+  // private resend = new Resend(process.env.RESEND_API_KEY);
+  private brevoClient: BrevoClient;
 
   constructor(
     @InjectRepository(User)
@@ -19,15 +23,16 @@ export class AuthService {
     private readonly otpService: OtpService,
     private jwtService: JwtService,
   ) {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    // this.transporter = nodemailer.createTransport({
+    //   host: process.env.SMTP_HOST,
+    //   port: Number(process.env.SMTP_PORT),
+    //   secure: process.env.SMTP_SECURE === 'true',
+    //   auth: {
+    //     user: process.env.SMTP_USER,
+    //     pass: process.env.SMTP_PASS,
+    //   },
+    // });
+    this.brevoClient = new BrevoClient({ apiKey: process.env.BREVO_API_KEY! });
   }
 
   private async sendVerificationEmail(email: string, otp: string, isReset: boolean) {
@@ -46,11 +51,11 @@ export class AuthService {
         <p>If you did not request, please ignore this email.</p>
       `;
 
-    await this.transporter.sendMail({
-      from: process.env.SMTP_FROM,
-      to: email,
+    await this.brevoClient.transactionalEmails.sendTransacEmail({
       subject,
-      html,
+      htmlContent: html,
+      sender: { name: 'TetPlanner', email: process.env.BREVO_FROM! },
+      to: [{ email }],
     });
   }
 
@@ -72,7 +77,8 @@ export class AuthService {
     const otp = this.otpService.generateOtp(createUserDto.email);
     try {
       await this.sendVerificationEmail(createUserDto.email, otp, false);
-    } catch {
+    } catch (err) {
+      console.error('[Brevo] sendVerificationEmail error:', err);
       this.otpService.clearOtp(createUserDto.email);
       await this.userRepository.remove(user);
       throw new InternalServerErrorException('Failed to send verification email. Please try again.');
@@ -127,7 +133,8 @@ export class AuthService {
     const otp = this.otpService.generateOtp(email);
     try {
       await this.sendVerificationEmail(email, otp, true);
-    } catch {
+    } catch (err) {
+      console.error('[Brevo] sendVerificationEmail error:', err);
       this.otpService.clearOtp(email);
       throw new InternalServerErrorException('Failed to send verification email. Please try again.');
     }
