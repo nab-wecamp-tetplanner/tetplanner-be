@@ -1,26 +1,43 @@
-import { Injectable } from '@nestjs/common';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Notification } from './entities/notification.entity';
 
 @Injectable()
 export class NotificationsService {
-  create(createNotificationDto: CreateNotificationDto) {
-    return 'This action adds a new notification';
+  constructor(
+    @InjectRepository(Notification)
+    private readonly notificationRepository: Repository<Notification>,
+  ) {}
+
+  async createForTodoItem(userId: string, todoItemId: string, title: string) {
+    const notification = this.notificationRepository.create({
+      title,
+      is_read: false,
+      user: { id: userId },
+      todo_item: { id: todoItemId },
+    });
+    return this.notificationRepository.save(notification);
   }
 
-  findAll() {
-    return `This action returns all notifications`;
+  async findAllByUser(userId: string) {
+    return this.notificationRepository.find({
+      where: { user: { id: userId } },
+      order: { created_at: 'DESC' },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} notification`;
+  async markRead(id: string, userId: string) {
+    const notification = await this.notificationRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
+    if (!notification) throw new NotFoundException('Notification not found');
+    notification.is_read = true;
+    return this.notificationRepository.save(notification);
   }
 
-  update(id: number, updateNotificationDto: UpdateNotificationDto) {
-    return `This action updates a #${id} notification`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} notification`;
+  async markAllRead(userId: string) {
+    await this.notificationRepository.update({ user: { id: userId }, is_read: false }, { is_read: true });
+    return { message: 'All notifications marked as read' };
   }
 }

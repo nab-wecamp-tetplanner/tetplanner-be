@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -9,6 +10,7 @@ import { TodoItemsModule } from './todo_items/todo_items.module';
 import { BudgetTransactionsModule } from './budget_transactions/budget_transactions.module';
 import { CollaboratorsModule } from './collaborators/collaborators.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { TasksModule } from './tasks/tasks.module';
 import { ConfigModule } from '@nestjs/config';
 import * as joi from 'joi';
 import configuration from './config/configuration';
@@ -33,6 +35,8 @@ import { SupabaseStorageModule } from './supabase-storage/supabase-storage.modul
       }),
     }),
     TypeOrmModule.forRootAsync(typeOrmConfig),
+    ScheduleModule.forRoot(),
+    TasksModule,
     UsersModule,
     TetConfigsModule,
     CategoriesModule,
