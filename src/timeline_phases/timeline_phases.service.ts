@@ -1,26 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { TimelinePhase } from './entities/timeline_phase.entity';
 import { CreateTimelinePhaseDto } from './dto/create-timeline_phase.dto';
 import { UpdateTimelinePhaseDto } from './dto/update-timeline_phase.dto';
 
 @Injectable()
 export class TimelinePhasesService {
-  create(createTimelinePhaseDto: CreateTimelinePhaseDto) {
-    return 'This action adds a new timelinePhase';
+  constructor(
+    @InjectRepository(TimelinePhase)
+    private readonly timelinePhaseRepository: Repository<TimelinePhase>,
+  ) {}
+
+  async create(createTimelinePhaseDto: CreateTimelinePhaseDto) {
+    const phase = this.timelinePhaseRepository.create({
+      ...createTimelinePhaseDto,
+      tet_config: { id: createTimelinePhaseDto.tet_config_id },
+    });
+    return this.timelinePhaseRepository.save(phase);
   }
 
-  findAll() {
-    return `This action returns all timelinePhases`;
+  async findAllByTetConfig(tetConfigId: string) {
+    return this.timelinePhaseRepository.find({
+      where: { tet_config: { id: tetConfigId } },
+      order: { display_order: 'ASC' },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} timelinePhase`;
+  async findOne(id: string) {
+    const phase = await this.timelinePhaseRepository.findOne({ where: { id } });
+    if (!phase) throw new NotFoundException('Timeline phase not found');
+    return phase;
   }
 
-  update(id: number, updateTimelinePhaseDto: UpdateTimelinePhaseDto) {
-    return `This action updates a #${id} timelinePhase`;
+  async update(id: string, updateTimelinePhaseDto: UpdateTimelinePhaseDto) {
+    const phase = await this.timelinePhaseRepository.findOne({ where: { id } });
+    if (!phase) throw new NotFoundException('Timeline phase not found');
+    Object.assign(phase, updateTimelinePhaseDto);
+    return this.timelinePhaseRepository.save(phase);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} timelinePhase`;
+  async remove(id: string) {
+    const phase = await this.timelinePhaseRepository.findOne({ where: { id } });
+    if (!phase) throw new NotFoundException('Timeline phase not found');
+    await this.timelinePhaseRepository.remove(phase);
+    return { message: 'Timeline phase deleted successfully' };
   }
 }
