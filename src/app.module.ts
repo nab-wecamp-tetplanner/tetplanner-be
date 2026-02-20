@@ -13,7 +13,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as joi from 'joi';
 import configuration from './config/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmConfig } from 'database/data-source';
+import { typeOrmConfig } from '../database/data-source';
 import { AuthModule } from './auth/auth.module';
 import { SupabaseStorageService } from './supabase-storage/supabase-storage.service';
 import { SupabaseStorageModule } from './supabase-storage/supabase-storage.module';
