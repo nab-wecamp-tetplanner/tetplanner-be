@@ -65,12 +65,7 @@ export class TetConfigsService {
     }
 
     // eslint-disable-next-line prettier/prettier
-    const result = await this.todoItemRepository
-      .createQueryBuilder('todo')
-      .select('COALESCE(SUM(todo.estimated_price * todo.quantity), 0)', 'used_budget')
-      .where('todo.tet_config_id = :id', { id })
-      .andWhere('todo.purchased = :purchased', { purchased: true })
-      .getRawOne();
+    const result = await this.todoItemRepository.createQueryBuilder('todo').select('COALESCE(SUM(todo.estimated_price * todo.quantity), 0)', 'used_budget').where('todo.tet_config_id = :id', { id }).andWhere('todo.purchased = :purchased', { purchased: true }).getRawOne();
 
     return {
       total_budget: tetConfig.total_budget,
