@@ -2,8 +2,6 @@ import { Injectable, BadRequestException, ConflictException, UnauthorizedExcepti
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-// import * as nodemailer from 'nodemailer';
-// import { Resend } from 'resend';
 import { BrevoClient } from '@getbrevo/brevo';
 import { User } from '../users/entities/user.entity';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -13,8 +11,6 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  // private transporter: nodemailer.Transporter;
-  // private resend = new Resend(process.env.RESEND_API_KEY);
   private brevoClient: BrevoClient;
 
   constructor(
@@ -23,15 +19,6 @@ export class AuthService {
     private readonly otpService: OtpService,
     private jwtService: JwtService,
   ) {
-    // this.transporter = nodemailer.createTransport({
-    //   host: process.env.SMTP_HOST,
-    //   port: Number(process.env.SMTP_PORT),
-    //   secure: process.env.SMTP_SECURE === 'true',
-    //   auth: {
-    //     user: process.env.SMTP_USER,
-    //     pass: process.env.SMTP_PASS,
-    //   },
-    // });
     this.brevoClient = new BrevoClient({ apiKey: process.env.BREVO_API_KEY! });
   }
 
