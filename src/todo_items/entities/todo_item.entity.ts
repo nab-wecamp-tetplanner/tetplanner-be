@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, DeleteDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { AfterLoad, Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, DeleteDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { TodoPriority, TodoStatus } from '../../helper/enums';
 import { TetConfig } from '../../tet_configs/entities/tet_config.entity';
 import { TimelinePhase } from '../../timeline_phases/entities/timeline_phase.entity';
@@ -42,6 +42,22 @@ export class TodoItem {
 
   @Column('uuid', { nullable: true })
   assigned_to: string;
+
+  @Column({ type: 'jsonb', default: {} })
+  subtasks: Record<string, boolean>;
+
+  done_percentage: number;
+
+  @AfterLoad()
+  computeDonePercentage() {
+    const entries = Object.keys(this.subtasks ?? {});
+    if (entries.length === 0) {
+      this.done_percentage = 0;
+      return;
+    }
+    const done = Object.values(this.subtasks).filter(Boolean).length;
+    this.done_percentage = Math.round((done / entries.length) * 100);
+  }
 
   @CreateDateColumn()
   created_at: Date;

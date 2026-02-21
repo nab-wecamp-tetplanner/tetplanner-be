@@ -76,6 +76,31 @@ export class TodoItemsService {
     return saved;
   }
 
+  async upsertSubtask(userId: string, id: string, name: string, done: boolean) {
+    const item = await this.todoItemRepository.findOne({
+      where: { id },
+      relations: ['tet_config'],
+    });
+    if (!item) throw new NotFoundException('Todo item not found');
+    await this.collaboratorsService.checkAccess(userId, item.tet_config.id);
+
+    item.subtasks = { ...item.subtasks, [name]: done };
+    return this.todoItemRepository.save(item);
+  }
+
+  async removeSubtask(userId: string, id: string, name: string) {
+    const item = await this.todoItemRepository.findOne({
+      where: { id },
+      relations: ['tet_config'],
+    });
+    if (!item) throw new NotFoundException('Todo item not found');
+    await this.collaboratorsService.checkAccess(userId, item.tet_config.id);
+
+    const { [name]: _, ...rest } = item.subtasks ?? {};
+    item.subtasks = rest;
+    return this.todoItemRepository.save(item);
+  }
+
   async remove(userId: string, id: string) {
     const item = await this.todoItemRepository.findOne({
       where: { id },

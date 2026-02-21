@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsDateString, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsInt, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, IsUUID } from 'class-validator';
 import { TodoPriority, TodoStatus } from '../../helper/enums';
 
 export class CreateTodoItemDto {
@@ -49,6 +49,16 @@ export class CreateTodoItemDto {
   @IsUUID('4')
   @IsOptional()
   assigned_to?: string;
+
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: { type: 'boolean' },
+    description: 'Subtasks map: task name → done',
+    nullable: true,
+  })
+  @IsObject()
+  @IsOptional()
+  subtasks?: Record<string, boolean>;
 
   @ApiProperty({ type: String, description: 'Tet config ID' })
   @IsUUID('4')
