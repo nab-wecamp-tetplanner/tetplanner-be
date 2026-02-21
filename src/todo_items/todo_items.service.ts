@@ -4,26 +4,30 @@ import { Repository } from 'typeorm';
 import { TodoItem } from './entities/todo_item.entity';
 import { CreateTodoItemDto } from './dto/create-todo_item.dto';
 import { UpdateTodoItemDto } from './dto/update-todo_item.dto';
+import { CollaboratorsService } from '../collaborators/collaborators.service';
 
 @Injectable()
 export class TodoItemsService {
   constructor(
     @InjectRepository(TodoItem)
     private readonly todoItemRepository: Repository<TodoItem>,
+    private readonly collaboratorsService: CollaboratorsService,
   ) {}
 
-  async create(createTodoItemDto: CreateTodoItemDto) {
+  async create(userId: string, createDto: CreateTodoItemDto) {
+    await this.collaboratorsService.checkAccess(userId, createDto.tet_config_id);
     const item = this.todoItemRepository.create({
-      ...createTodoItemDto,
-      tet_config: { id: createTodoItemDto.tet_config_id },
-      timeline_phase: { id: createTodoItemDto.timeline_phase_id },
-      category: { id: createTodoItemDto.category_id },
-      ...(createTodoItemDto.assigned_to && { assigned_to_user: { id: createTodoItemDto.assigned_to } }),
+      ...createDto,
+      tet_config: { id: createDto.tet_config_id },
+      timeline_phase: { id: createDto.timeline_phase_id },
+      category: { id: createDto.category_id },
+      ...(createDto.assigned_to && { assigned_to_user: { id: createDto.assigned_to } }),
     });
     return this.todoItemRepository.save(item);
   }
 
-  async findAllByTetConfig(tetConfigId: string, timelinePhaseId?: string) {
+  async findAllByTetConfig(userId: string, tetConfigId: string, timelinePhaseId?: string) {
+    await this.collaboratorsService.checkAccess(userId, tetConfigId);
     const where: any = { tet_config: { id: tetConfigId } };
     if (timelinePhaseId) where.timeline_phase = { id: timelinePhaseId };
     return this.todoItemRepository.find({
@@ -32,22 +36,34 @@ export class TodoItemsService {
     });
   }
 
-  async findOne(id: string) {
-    const item = await this.todoItemRepository.findOne({ where: { id } });
+  async findOne(userId: string, id: string) {
+    const item = await this.todoItemRepository.findOne({
+      where: { id },
+      relations: ['tet_config'],
+    });
     if (!item) throw new NotFoundException('Todo item not found');
+    await this.collaboratorsService.checkAccess(userId, item.tet_config.id);
     return item;
   }
 
-  async update(id: string, updateTodoItemDto: UpdateTodoItemDto) {
-    const item = await this.todoItemRepository.findOne({ where: { id } });
+  async update(userId: string, id: string, updateDto: UpdateTodoItemDto) {
+    const item = await this.todoItemRepository.findOne({
+      where: { id },
+      relations: ['tet_config'],
+    });
     if (!item) throw new NotFoundException('Todo item not found');
-    Object.assign(item, updateTodoItemDto);
+    await this.collaboratorsService.checkAccess(userId, item.tet_config.id);
+    Object.assign(item, updateDto);
     return this.todoItemRepository.save(item);
   }
 
-  async remove(id: string) {
-    const item = await this.todoItemRepository.findOne({ where: { id } });
+  async remove(userId: string, id: string) {
+    const item = await this.todoItemRepository.findOne({
+      where: { id },
+      relations: ['tet_config'],
+    });
     if (!item) throw new NotFoundException('Todo item not found');
+    await this.collaboratorsService.checkAccess(userId, item.tet_config.id);
     await this.todoItemRepository.softRemove(item);
     return { message: 'Todo item deleted successfully' };
   }

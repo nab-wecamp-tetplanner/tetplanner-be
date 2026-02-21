@@ -4,6 +4,7 @@ import { TetConfig } from '../../tet_configs/entities/tet_config.entity';
 import { TimelinePhase } from '../../timeline_phases/entities/timeline_phase.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { User } from '../../users/entities/user.entity';
+// not needed, transactions dont link to todo items anymore
 import { BudgetTransaction } from '../../budget_transactions/entities/budget_transaction.entity';
 import { Notification } from '../../notifications/entities/notification.entity';
 
@@ -65,6 +66,7 @@ export class TodoItem {
   @JoinColumn({ name: 'assigned_to' })
   assigned_to_user: User;
 
+  // drop this, transactions are standalone now
   @OneToMany(() => BudgetTransaction, (transaction) => transaction.todo_item)
   budget_transactions: BudgetTransaction[];
 

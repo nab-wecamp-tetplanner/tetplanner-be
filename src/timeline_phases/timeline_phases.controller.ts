@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TimelinePhasesService } from './timeline_phases.service';
 import { CreateTimelinePhaseDto } from './dto/create-timeline_phase.dto';
@@ -15,43 +15,43 @@ export class TimelinePhasesController {
   @Post()
   @ApiOperation({ summary: 'Create a timeline phase for a tet config' })
   @ApiResponse({ status: 201, description: 'Timeline phase created successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async create(@Body() createTimelinePhaseDto: CreateTimelinePhaseDto) {
-    return this.timelinePhasesService.create(createTimelinePhaseDto);
+  @ApiResponse({ status: 403, description: 'Access denied' })
+  async create(@Req() req: any, @Body() createDto: CreateTimelinePhaseDto) {
+    return this.timelinePhasesService.create(req.user.userId, createDto);
   }
 
   @Get('tet-config/:tetConfigId')
   @ApiOperation({ summary: 'Get all timeline phases for a tet config' })
   @ApiResponse({ status: 200, description: 'Timeline phases returned' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findAllByTetConfig(@Param('tetConfigId') tetConfigId: string) {
-    return this.timelinePhasesService.findAllByTetConfig(tetConfigId);
+  @ApiResponse({ status: 403, description: 'Access denied' })
+  async findAllByTetConfig(@Req() req: any, @Param('tetConfigId') tetConfigId: string) {
+    return this.timelinePhasesService.findAllByTetConfig(req.user.userId, tetConfigId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a timeline phase by ID' })
   @ApiResponse({ status: 200, description: 'Timeline phase returned' })
   @ApiResponse({ status: 404, description: 'Timeline phase not found' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findOne(@Param('id') id: string) {
-    return this.timelinePhasesService.findOne(id);
+  @ApiResponse({ status: 403, description: 'Access denied' })
+  async findOne(@Req() req: any, @Param('id') id: string) {
+    return this.timelinePhasesService.findOne(req.user.userId, id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a timeline phase' })
   @ApiResponse({ status: 200, description: 'Timeline phase updated successfully' })
   @ApiResponse({ status: 404, description: 'Timeline phase not found' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async update(@Param('id') id: string, @Body() updateTimelinePhaseDto: UpdateTimelinePhaseDto) {
-    return this.timelinePhasesService.update(id, updateTimelinePhaseDto);
+  @ApiResponse({ status: 403, description: 'Access denied' })
+  async update(@Req() req: any, @Param('id') id: string, @Body() updateDto: UpdateTimelinePhaseDto) {
+    return this.timelinePhasesService.update(req.user.userId, id, updateDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a timeline phase' })
   @ApiResponse({ status: 200, description: 'Timeline phase deleted successfully' })
   @ApiResponse({ status: 404, description: 'Timeline phase not found' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async remove(@Param('id') id: string) {
-    return this.timelinePhasesService.remove(id);
+  @ApiResponse({ status: 403, description: 'Access denied' })
+  async remove(@Req() req: any, @Param('id') id: string) {
+    return this.timelinePhasesService.remove(req.user.userId, id);
   }
 }

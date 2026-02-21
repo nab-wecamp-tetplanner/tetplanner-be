@@ -1,4 +1,10 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateCollaboratorDto } from './create-collaborator.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsNotEmpty } from 'class-validator';
+import { CollaboratorRole } from '../../helper/enums';
 
-export class UpdateCollaboratorDto extends PartialType(CreateCollaboratorDto) {}
+export class UpdateCollaboratorDto {
+  @ApiProperty({ enum: CollaboratorRole, description: 'New collaborator role' })
+  @IsEnum(CollaboratorRole)
+  @IsNotEmpty()
+  role!: CollaboratorRole;
+}

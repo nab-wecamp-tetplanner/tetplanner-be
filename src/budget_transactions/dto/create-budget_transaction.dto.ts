@@ -30,11 +30,13 @@ export class CreateBudgetTransactionDto {
   @IsNotEmpty()
   tet_config_id!: string;
 
+  // drop this, no category on transactions
   @ApiProperty({ type: String, description: 'Category ID' })
   @IsUUID('4')
   @IsNotEmpty()
   category_id!: string;
 
+  // drop this, not linking to todo items
   @ApiProperty({ type: String, description: 'Todo item ID', nullable: true })
   @IsUUID('4')
   @IsOptional()

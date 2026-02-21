@@ -3,6 +3,7 @@ import { TetConfig } from '../../tet_configs/entities/tet_config.entity';
 import { Collaborator } from '../../collaborators/entities/collaborator.entity';
 import { Notification } from '../../notifications/entities/notification.entity';
 import { TodoItem } from '../../todo_items/entities/todo_item.entity';
+// not needed, transactions dont track who recorded
 import { BudgetTransaction } from '../../budget_transactions/entities/budget_transaction.entity';
 
 @Entity('users')
@@ -44,6 +45,7 @@ export class User {
   @OneToMany(() => TodoItem, (todo_item) => todo_item.assigned_to_user)
   assigned_todo_items: TodoItem[];
 
+  // drop this, transactions are standalone
   @OneToMany(() => BudgetTransaction, (transaction) => transaction.recorded_by_user)
   recorded_transactions: BudgetTransaction[];
 }
