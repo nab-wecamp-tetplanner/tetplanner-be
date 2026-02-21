@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, DeleteDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { TetConfig } from '../../tet_configs/entities/tet_config.entity';
 import { TodoItem } from '../../todo_items/entities/todo_item.entity';
+// not needed, transactions dont have categories anymore
 import { BudgetTransaction } from '../../budget_transactions/entities/budget_transaction.entity';
 
 @Entity('categories')
@@ -31,6 +32,7 @@ export class Category {
   @OneToMany(() => TodoItem, (todo_item) => todo_item.category, { cascade: ['remove'] })
   todo_items: TodoItem[];
 
+  // drop this, no more category on transactions
   @OneToMany(() => BudgetTransaction, (transaction) => transaction.category, { cascade: ['remove'] })
   budget_transactions: BudgetTransaction[];
 }

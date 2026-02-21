@@ -14,67 +14,99 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TodoItemsController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const todo_items_service_1 = require("./todo_items.service");
 const create_todo_item_dto_1 = require("./dto/create-todo_item.dto");
 const update_todo_item_dto_1 = require("./dto/update-todo_item.dto");
+const jwt_guard_1 = require("../auth/guards/jwt.guard");
 let TodoItemsController = class TodoItemsController {
     todoItemsService;
     constructor(todoItemsService) {
         this.todoItemsService = todoItemsService;
     }
-    create(createTodoItemDto) {
-        return this.todoItemsService.create(createTodoItemDto);
+    async create(req, createDto) {
+        return this.todoItemsService.create(req.user.userId, createDto);
     }
-    findAll() {
-        return this.todoItemsService.findAll();
+    async findAll(req, tetConfigId, timelinePhaseId) {
+        return this.todoItemsService.findAllByTetConfig(req.user.userId, tetConfigId, timelinePhaseId);
     }
-    findOne(id) {
-        return this.todoItemsService.findOne(+id);
+    async findOne(req, id) {
+        return this.todoItemsService.findOne(req.user.userId, id);
     }
-    update(id, updateTodoItemDto) {
-        return this.todoItemsService.update(+id, updateTodoItemDto);
+    async update(req, id, updateDto) {
+        return this.todoItemsService.update(req.user.userId, id, updateDto);
     }
-    remove(id) {
-        return this.todoItemsService.remove(+id);
+    async remove(req, id) {
+        return this.todoItemsService.remove(req.user.userId, id);
     }
 };
 exports.TodoItemsController = TodoItemsController;
 __decorate([
     (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new todo item' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Todo item created successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Access denied' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_todo_item_dto_1.CreateTodoItemDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, create_todo_item_dto_1.CreateTodoItemDto]),
+    __metadata("design:returntype", Promise)
 ], TodoItemsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all todo items by tet config, optionally filtered by timeline phase' }),
+    (0, swagger_1.ApiQuery)({ name: 'tet_config_id', required: true, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'timeline_phase_id', required: false, type: String }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Todo items returned' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Access denied' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('tet_config_id')),
+    __param(2, (0, common_1.Query)('timeline_phase_id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
 ], TodoItemsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, swagger_1.ApiOperation)({ summary: 'Get a todo item by ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Todo item returned' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Todo item not found' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Access denied' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
 ], TodoItemsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    (0, swagger_1.ApiOperation)({ summary: 'Update a todo item' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Todo item updated successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Todo item not found' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Access denied' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_todo_item_dto_1.UpdateTodoItemDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, String, update_todo_item_dto_1.UpdateTodoItemDto]),
+    __metadata("design:returntype", Promise)
 ], TodoItemsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete a todo item (soft delete)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Todo item deleted successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Todo item not found' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Access denied' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
 ], TodoItemsController.prototype, "remove", null);
 exports.TodoItemsController = TodoItemsController = __decorate([
+    (0, swagger_1.ApiTags)('todo-items'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('todo-items'),
     __metadata("design:paramtypes", [todo_items_service_1.TodoItemsService])
 ], TodoItemsController);

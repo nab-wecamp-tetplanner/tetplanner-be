@@ -5,28 +5,64 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationsService = void 0;
 const common_1 = require("@nestjs/common");
+const typeorm_1 = require("@nestjs/typeorm");
+const typeorm_2 = require("typeorm");
+const notification_entity_1 = require("./entities/notification.entity");
 let NotificationsService = class NotificationsService {
-    create(createNotificationDto) {
-        return 'This action adds a new notification';
+    notificationRepository;
+    constructor(notificationRepository) {
+        this.notificationRepository = notificationRepository;
     }
-    findAll() {
-        return `This action returns all notifications`;
+    async createForTodoItem(userId, todoItemId, title) {
+        const notification = this.notificationRepository.create({
+            title,
+            is_read: false,
+            user: { id: userId },
+            todo_item: { id: todoItemId },
+        });
+        return this.notificationRepository.save(notification);
     }
-    findOne(id) {
-        return `This action returns a #${id} notification`;
+    async createForUser(userId, title) {
+        const notification = this.notificationRepository.create({
+            title,
+            is_read: false,
+            user: { id: userId },
+        });
+        return this.notificationRepository.save(notification);
     }
-    update(id, updateNotificationDto) {
-        return `This action updates a #${id} notification`;
+    async findAllByUser(userId) {
+        return this.notificationRepository.find({
+            where: { user: { id: userId } },
+            order: { created_at: 'DESC' },
+        });
     }
-    remove(id) {
-        return `This action removes a #${id} notification`;
+    async markRead(id, userId) {
+        const notification = await this.notificationRepository.findOne({
+            where: { id, user: { id: userId } },
+        });
+        if (!notification)
+            throw new common_1.NotFoundException('Notification not found');
+        notification.is_read = true;
+        return this.notificationRepository.save(notification);
+    }
+    async markAllRead(userId) {
+        await this.notificationRepository.update({ user: { id: userId }, is_read: false }, { is_read: true });
+        return { message: 'All notifications marked as read' };
     }
 };
 exports.NotificationsService = NotificationsService;
 exports.NotificationsService = NotificationsService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(notification_entity_1.Notification)),
+    __metadata("design:paramtypes", [typeorm_2.Repository])
 ], NotificationsService);
 //# sourceMappingURL=notifications.service.js.map

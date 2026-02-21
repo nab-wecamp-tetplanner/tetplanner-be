@@ -4,9 +4,10 @@ import { UpdateCollaboratorDto } from './dto/update-collaborator.dto';
 export declare class CollaboratorsController {
     private readonly collaboratorsService;
     constructor(collaboratorsService: CollaboratorsService);
-    create(createCollaboratorDto: CreateCollaboratorDto): string;
-    findAll(): string;
-    findOne(id: string): string;
-    update(id: string, updateCollaboratorDto: UpdateCollaboratorDto): string;
-    remove(id: string): string;
+    add(req: any, createDto: CreateCollaboratorDto): Promise<import("./entities/collaborator.entity").Collaborator>;
+    findAll(req: any, tetConfigId: string): Promise<import("./entities/collaborator.entity").Collaborator[]>;
+    updateRole(id: string, req: any, updateDto: UpdateCollaboratorDto): Promise<import("./entities/collaborator.entity").Collaborator>;
+    remove(id: string, req: any): Promise<{
+        message: string;
+    }>;
 }

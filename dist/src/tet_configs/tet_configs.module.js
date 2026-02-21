@@ -13,14 +13,16 @@ const tet_configs_service_1 = require("./tet_configs.service");
 const tet_configs_controller_1 = require("./tet_configs.controller");
 const tet_config_entity_1 = require("./entities/tet_config.entity");
 const todo_item_entity_1 = require("../todo_items/entities/todo_item.entity");
+const category_entity_1 = require("../categories/entities/category.entity");
+const budget_calculations_service_1 = require("../helper/budget-calculations.service");
 let TetConfigsModule = class TetConfigsModule {
 };
 exports.TetConfigsModule = TetConfigsModule;
 exports.TetConfigsModule = TetConfigsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([tet_config_entity_1.TetConfig, todo_item_entity_1.TodoItem])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([tet_config_entity_1.TetConfig, todo_item_entity_1.TodoItem, category_entity_1.Category])],
         controllers: [tet_configs_controller_1.TetConfigsController],
-        providers: [tet_configs_service_1.TetConfigsService],
+        providers: [tet_configs_service_1.TetConfigsService, budget_calculations_service_1.BudgetCalculationsService],
     })
 ], TetConfigsModule);
 //# sourceMappingURL=tet_configs.module.js.map

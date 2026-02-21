@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const budget_transactions_service_1 = require("./budget_transactions.service");
 const budget_transactions_controller_1 = require("./budget_transactions.controller");
 const budget_transaction_entity_1 = require("./entities/budget_transaction.entity");
+const collaborators_module_1 = require("../collaborators/collaborators.module");
 let BudgetTransactionsModule = class BudgetTransactionsModule {
 };
 exports.BudgetTransactionsModule = BudgetTransactionsModule;
 exports.BudgetTransactionsModule = BudgetTransactionsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([budget_transaction_entity_1.BudgetTransaction])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([budget_transaction_entity_1.BudgetTransaction]), collaborators_module_1.CollaboratorsModule],
         controllers: [budget_transactions_controller_1.BudgetTransactionsController],
         providers: [budget_transactions_service_1.BudgetTransactionsService],
     })

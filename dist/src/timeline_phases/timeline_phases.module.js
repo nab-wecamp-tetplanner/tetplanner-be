@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const timeline_phases_service_1 = require("./timeline_phases.service");
 const timeline_phases_controller_1 = require("./timeline_phases.controller");
 const timeline_phase_entity_1 = require("./entities/timeline_phase.entity");
+const collaborators_module_1 = require("../collaborators/collaborators.module");
 let TimelinePhasesModule = class TimelinePhasesModule {
 };
 exports.TimelinePhasesModule = TimelinePhasesModule;
 exports.TimelinePhasesModule = TimelinePhasesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([timeline_phase_entity_1.TimelinePhase])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([timeline_phase_entity_1.TimelinePhase]), collaborators_module_1.CollaboratorsModule],
         controllers: [timeline_phases_controller_1.TimelinePhasesController],
         providers: [timeline_phases_service_1.TimelinePhasesService],
     })

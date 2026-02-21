@@ -8,15 +8,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CollaboratorsModule = void 0;
 const common_1 = require("@nestjs/common");
+const typeorm_1 = require("@nestjs/typeorm");
 const collaborators_service_1 = require("./collaborators.service");
 const collaborators_controller_1 = require("./collaborators.controller");
+const collaborator_entity_1 = require("./entities/collaborator.entity");
+const tet_config_entity_1 = require("../tet_configs/entities/tet_config.entity");
 let CollaboratorsModule = class CollaboratorsModule {
 };
 exports.CollaboratorsModule = CollaboratorsModule;
 exports.CollaboratorsModule = CollaboratorsModule = __decorate([
     (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([collaborator_entity_1.Collaborator, tet_config_entity_1.TetConfig])],
         controllers: [collaborators_controller_1.CollaboratorsController],
         providers: [collaborators_service_1.CollaboratorsService],
+        exports: [collaborators_service_1.CollaboratorsService],
     })
 ], CollaboratorsModule);
 //# sourceMappingURL=collaborators.module.js.map

@@ -14,67 +14,83 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CollaboratorsController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const collaborators_service_1 = require("./collaborators.service");
 const create_collaborator_dto_1 = require("./dto/create-collaborator.dto");
 const update_collaborator_dto_1 = require("./dto/update-collaborator.dto");
+const jwt_guard_1 = require("../auth/guards/jwt.guard");
 let CollaboratorsController = class CollaboratorsController {
     collaboratorsService;
     constructor(collaboratorsService) {
         this.collaboratorsService = collaboratorsService;
     }
-    create(createCollaboratorDto) {
-        return this.collaboratorsService.create(createCollaboratorDto);
+    async add(req, createDto) {
+        return this.collaboratorsService.add(req.user.userId, createDto);
     }
-    findAll() {
-        return this.collaboratorsService.findAll();
+    async findAll(req, tetConfigId) {
+        return this.collaboratorsService.findAllByTetConfig(req.user.userId, tetConfigId);
     }
-    findOne(id) {
-        return this.collaboratorsService.findOne(+id);
+    async updateRole(id, req, updateDto) {
+        return this.collaboratorsService.updateRole(id, req.user.userId, updateDto.role);
     }
-    update(id, updateCollaboratorDto) {
-        return this.collaboratorsService.update(+id, updateCollaboratorDto);
-    }
-    remove(id) {
-        return this.collaboratorsService.remove(+id);
+    async remove(id, req) {
+        return this.collaboratorsService.remove(id, req.user.userId);
     }
 };
 exports.CollaboratorsController = CollaboratorsController;
 __decorate([
     (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_collaborator_dto_1.CreateCollaboratorDto]),
-    __metadata("design:returntype", void 0)
-], CollaboratorsController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)(),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], CollaboratorsController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], CollaboratorsController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, swagger_1.ApiOperation)({ summary: 'Add a collaborator to a tet config (owner only)' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Collaborator added' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Only owner can add collaborators' }),
+    (0, swagger_1.ApiResponse)({ status: 409, description: 'User is already a collaborator' }),
+    __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_collaborator_dto_1.UpdateCollaboratorDto]),
-    __metadata("design:returntype", void 0)
-], CollaboratorsController.prototype, "update", null);
+    __metadata("design:paramtypes", [Object, create_collaborator_dto_1.CreateCollaboratorDto]),
+    __metadata("design:returntype", Promise)
+], CollaboratorsController.prototype, "add", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: 'List collaborators of a tet config' }),
+    (0, swagger_1.ApiQuery)({ name: 'tet_config_id', required: true, type: String }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Collaborators returned' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Access denied' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('tet_config_id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], CollaboratorsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update collaborator role (owner only)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Role updated' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Only owner can update roles' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Collaborator not found' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, update_collaborator_dto_1.UpdateCollaboratorDto]),
+    __metadata("design:returntype", Promise)
+], CollaboratorsController.prototype, "updateRole", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Remove a collaborator (owner only)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Collaborator removed' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Only owner can remove collaborators' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Collaborator not found' }),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], CollaboratorsController.prototype, "remove", null);
 exports.CollaboratorsController = CollaboratorsController = __decorate([
+    (0, swagger_1.ApiTags)('collaborators'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('collaborators'),
     __metadata("design:paramtypes", [collaborators_service_1.CollaboratorsService])
 ], CollaboratorsController);

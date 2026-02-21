@@ -4,11 +4,11 @@ import { UpdateTimelinePhaseDto } from './dto/update-timeline_phase.dto';
 export declare class TimelinePhasesController {
     private readonly timelinePhasesService;
     constructor(timelinePhasesService: TimelinePhasesService);
-    create(createTimelinePhaseDto: CreateTimelinePhaseDto): Promise<import("./entities/timeline_phase.entity").TimelinePhase>;
-    findAllByTetConfig(tetConfigId: string): Promise<import("./entities/timeline_phase.entity").TimelinePhase[]>;
-    findOne(id: string): Promise<import("./entities/timeline_phase.entity").TimelinePhase>;
-    update(id: string, updateTimelinePhaseDto: UpdateTimelinePhaseDto): Promise<import("./entities/timeline_phase.entity").TimelinePhase>;
-    remove(id: string): Promise<{
+    create(req: any, createDto: CreateTimelinePhaseDto): Promise<import("./entities/timeline_phase.entity").TimelinePhase>;
+    findAllByTetConfig(req: any, tetConfigId: string): Promise<import("./entities/timeline_phase.entity").TimelinePhase[]>;
+    findOne(req: any, id: string): Promise<import("./entities/timeline_phase.entity").TimelinePhase>;
+    update(req: any, id: string, updateDto: UpdateTimelinePhaseDto): Promise<import("./entities/timeline_phase.entity").TimelinePhase>;
+    remove(req: any, id: string): Promise<{
         message: string;
     }>;
 }
