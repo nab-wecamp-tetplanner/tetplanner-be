@@ -9,6 +9,19 @@ export declare class TetConfigsController {
     getBudgetSummary(id: string): Promise<{
         total_budget: number;
         used_budget: number;
+        remaining_budget: number;
+        percentage_used: number;
+        warning_level: "ok" | "warning" | "critical";
+        categories: {
+            id: string;
+            name: string;
+            icon: string;
+            allocated_budget: number | null;
+            used_budget: number;
+            remaining_budget: number | null;
+            percentage_used: number | null;
+            warning_level: string;
+        }[];
     }>;
     findOne(id: string): Promise<import("./entities/tet_config.entity").TetConfig>;
     updateBudget(id: string, body: {

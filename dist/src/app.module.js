@@ -44,6 +44,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
+const schedule_1 = require("@nestjs/schedule");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const users_module_1 = require("./users/users.module");
@@ -54,6 +55,7 @@ const todo_items_module_1 = require("./todo_items/todo_items.module");
 const budget_transactions_module_1 = require("./budget_transactions/budget_transactions.module");
 const collaborators_module_1 = require("./collaborators/collaborators.module");
 const notifications_module_1 = require("./notifications/notifications.module");
+const tasks_module_1 = require("./tasks/tasks.module");
 const config_1 = require("@nestjs/config");
 const joi = __importStar(require("joi"));
 const configuration_1 = __importDefault(require("./config/configuration"));
@@ -80,6 +82,8 @@ exports.AppModule = AppModule = __decorate([
                 }),
             }),
             typeorm_1.TypeOrmModule.forRootAsync(data_source_1.typeOrmConfig),
+            schedule_1.ScheduleModule.forRoot(),
+            tasks_module_1.TasksModule,
             users_module_1.UsersModule,
             tet_configs_module_1.TetConfigsModule,
             categories_module_1.CategoriesModule,

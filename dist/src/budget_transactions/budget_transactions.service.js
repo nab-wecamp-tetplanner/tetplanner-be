@@ -17,12 +17,16 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const budget_transaction_entity_1 = require("./entities/budget_transaction.entity");
+const collaborators_service_1 = require("../collaborators/collaborators.service");
 let BudgetTransactionsService = class BudgetTransactionsService {
     transactionRepository;
-    constructor(transactionRepository) {
+    collaboratorsService;
+    constructor(transactionRepository, collaboratorsService) {
         this.transactionRepository = transactionRepository;
+        this.collaboratorsService = collaboratorsService;
     }
     async create(userId, createDto) {
+        await this.collaboratorsService.checkAccess(userId, createDto.tet_config_id);
         const transaction = this.transactionRepository.create({
             ...createDto,
             tet_config: { id: createDto.tet_config_id },
@@ -32,27 +36,31 @@ let BudgetTransactionsService = class BudgetTransactionsService {
         });
         return this.transactionRepository.save(transaction);
     }
-    async findAllByTetConfig(tetConfigId) {
+    async findAllByTetConfig(userId, tetConfigId) {
+        await this.collaboratorsService.checkAccess(userId, tetConfigId);
         return this.transactionRepository.find({
             where: { tet_config: { id: tetConfigId } },
             relations: ['category', 'todo_item', 'recorded_by_user'],
         });
     }
-    async findOne(id) {
+    async findOne(userId, id) {
         const transaction = await this.transactionRepository.findOne({
             where: { id },
-            relations: ['category', 'todo_item', 'recorded_by_user'],
+            relations: ['tet_config', 'category', 'todo_item', 'recorded_by_user'],
         });
-        if (!transaction) {
+        if (!transaction)
             throw new common_1.NotFoundException('Budget transaction not found');
-        }
+        await this.collaboratorsService.checkAccess(userId, transaction.tet_config.id);
         return transaction;
     }
-    async update(id, updateDto) {
-        const transaction = await this.transactionRepository.findOne({ where: { id } });
-        if (!transaction) {
+    async update(userId, id, updateDto) {
+        const transaction = await this.transactionRepository.findOne({
+            where: { id },
+            relations: ['tet_config'],
+        });
+        if (!transaction)
             throw new common_1.NotFoundException('Budget transaction not found');
-        }
+        await this.collaboratorsService.checkAccess(userId, transaction.tet_config.id);
         Object.assign(transaction, updateDto);
         if (updateDto.category_id) {
             transaction.category = { id: updateDto.category_id };
@@ -62,11 +70,14 @@ let BudgetTransactionsService = class BudgetTransactionsService {
         }
         return this.transactionRepository.save(transaction);
     }
-    async remove(id) {
-        const transaction = await this.transactionRepository.findOne({ where: { id } });
-        if (!transaction) {
+    async remove(userId, id) {
+        const transaction = await this.transactionRepository.findOne({
+            where: { id },
+            relations: ['tet_config'],
+        });
+        if (!transaction)
             throw new common_1.NotFoundException('Budget transaction not found');
-        }
+        await this.collaboratorsService.checkAccess(userId, transaction.tet_config.id);
         await this.transactionRepository.remove(transaction);
         return { message: 'Budget transaction deleted successfully' };
     }
@@ -75,6 +86,7 @@ exports.BudgetTransactionsService = BudgetTransactionsService;
 exports.BudgetTransactionsService = BudgetTransactionsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(budget_transaction_entity_1.BudgetTransaction)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        collaborators_service_1.CollaboratorsService])
 ], BudgetTransactionsService);
 //# sourceMappingURL=budget_transactions.service.js.map

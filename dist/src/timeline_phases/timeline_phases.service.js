@@ -17,41 +17,58 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const timeline_phase_entity_1 = require("./entities/timeline_phase.entity");
+const collaborators_service_1 = require("../collaborators/collaborators.service");
 let TimelinePhasesService = class TimelinePhasesService {
     timelinePhaseRepository;
-    constructor(timelinePhaseRepository) {
+    collaboratorsService;
+    constructor(timelinePhaseRepository, collaboratorsService) {
         this.timelinePhaseRepository = timelinePhaseRepository;
+        this.collaboratorsService = collaboratorsService;
     }
-    async create(createTimelinePhaseDto) {
+    async create(userId, createDto) {
+        await this.collaboratorsService.checkAccess(userId, createDto.tet_config_id);
         const phase = this.timelinePhaseRepository.create({
-            ...createTimelinePhaseDto,
-            tet_config: { id: createTimelinePhaseDto.tet_config_id },
+            ...createDto,
+            tet_config: { id: createDto.tet_config_id },
         });
         return this.timelinePhaseRepository.save(phase);
     }
-    async findAllByTetConfig(tetConfigId) {
+    async findAllByTetConfig(userId, tetConfigId) {
+        await this.collaboratorsService.checkAccess(userId, tetConfigId);
         return this.timelinePhaseRepository.find({
             where: { tet_config: { id: tetConfigId } },
             order: { display_order: 'ASC' },
         });
     }
-    async findOne(id) {
-        const phase = await this.timelinePhaseRepository.findOne({ where: { id } });
+    async findOne(userId, id) {
+        const phase = await this.timelinePhaseRepository.findOne({
+            where: { id },
+            relations: ['tet_config'],
+        });
         if (!phase)
             throw new common_1.NotFoundException('Timeline phase not found');
+        await this.collaboratorsService.checkAccess(userId, phase.tet_config.id);
         return phase;
     }
-    async update(id, updateTimelinePhaseDto) {
-        const phase = await this.timelinePhaseRepository.findOne({ where: { id } });
+    async update(userId, id, updateDto) {
+        const phase = await this.timelinePhaseRepository.findOne({
+            where: { id },
+            relations: ['tet_config'],
+        });
         if (!phase)
             throw new common_1.NotFoundException('Timeline phase not found');
-        Object.assign(phase, updateTimelinePhaseDto);
+        await this.collaboratorsService.checkAccess(userId, phase.tet_config.id);
+        Object.assign(phase, updateDto);
         return this.timelinePhaseRepository.save(phase);
     }
-    async remove(id) {
-        const phase = await this.timelinePhaseRepository.findOne({ where: { id } });
+    async remove(userId, id) {
+        const phase = await this.timelinePhaseRepository.findOne({
+            where: { id },
+            relations: ['tet_config'],
+        });
         if (!phase)
             throw new common_1.NotFoundException('Timeline phase not found');
+        await this.collaboratorsService.checkAccess(userId, phase.tet_config.id);
         await this.timelinePhaseRepository.remove(phase);
         return { message: 'Timeline phase deleted successfully' };
     }
@@ -60,6 +77,7 @@ exports.TimelinePhasesService = TimelinePhasesService;
 exports.TimelinePhasesService = TimelinePhasesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(timeline_phase_entity_1.TimelinePhase)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        collaborators_service_1.CollaboratorsService])
 ], TimelinePhasesService);
 //# sourceMappingURL=timeline_phases.service.js.map

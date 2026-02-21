@@ -18,12 +18,25 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const tet_config_entity_1 = require("./entities/tet_config.entity");
 const todo_item_entity_1 = require("../todo_items/entities/todo_item.entity");
+const category_entity_1 = require("../categories/entities/category.entity");
+const budget_calculations_service_1 = require("../helper/budget-calculations.service");
+function warningLevel(percentage) {
+    if (percentage >= 100)
+        return 'critical';
+    if (percentage >= 80)
+        return 'warning';
+    return 'ok';
+}
 let TetConfigsService = class TetConfigsService {
     tetConfigRepository;
     todoItemRepository;
-    constructor(tetConfigRepository, todoItemRepository) {
+    categoryRepository;
+    budgetCalculationsService;
+    constructor(tetConfigRepository, todoItemRepository, categoryRepository, budgetCalculationsService) {
         this.tetConfigRepository = tetConfigRepository;
         this.todoItemRepository = todoItemRepository;
+        this.categoryRepository = categoryRepository;
+        this.budgetCalculationsService = budgetCalculationsService;
     }
     async create(userId, createTetConfigDto) {
         const tetConfig = this.tetConfigRepository.create({
@@ -65,18 +78,39 @@ let TetConfigsService = class TetConfigsService {
     }
     async getBudgetSummary(id) {
         const tetConfig = await this.tetConfigRepository.findOne({ where: { id } });
-        if (!tetConfig) {
+        if (!tetConfig)
             throw new common_1.NotFoundException('Tet config not found');
-        }
-        const result = await this.todoItemRepository
-            .createQueryBuilder('todo')
-            .select('COALESCE(SUM(todo.estimated_price * todo.quantity), 0)', 'used_budget')
-            .where('todo.tet_config_id = :id', { id })
-            .andWhere('todo.purchased = :purchased', { purchased: true })
-            .getRawOne();
+        const usedBudget = await this.budgetCalculationsService.calculateTotalUsed(id);
+        const totalBudget = Number(tetConfig.total_budget);
+        const remainingBudget = totalBudget - usedBudget;
+        const percentageUsed = this.budgetCalculationsService.calculatePercentage(usedBudget, totalBudget);
+        const categories = await this.categoryRepository.find({
+            where: { tet_config: { id } },
+        });
+        const usedByCategory = await this.budgetCalculationsService.calculateUsedByCategory(id);
+        const categoryBreakdown = categories.map((cat) => {
+            const catUsed = usedByCategory.get(cat.id) ?? 0;
+            const catAllocated = cat.allocated_budget ? Number(cat.allocated_budget) : null;
+            const catRemaining = catAllocated !== null ? catAllocated - catUsed : null;
+            const catPercentage = catAllocated && catAllocated > 0 ? this.budgetCalculationsService.calculatePercentage(catUsed, catAllocated) : null;
+            return {
+                id: cat.id,
+                name: cat.name,
+                icon: cat.icon,
+                allocated_budget: catAllocated,
+                used_budget: catUsed,
+                remaining_budget: catRemaining,
+                percentage_used: catPercentage,
+                warning_level: catPercentage !== null ? warningLevel(catPercentage) : 'no_limit',
+            };
+        });
         return {
-            total_budget: tetConfig.total_budget,
-            used_budget: parseFloat(result.used_budget),
+            total_budget: totalBudget,
+            used_budget: usedBudget,
+            remaining_budget: remainingBudget,
+            percentage_used: percentageUsed,
+            warning_level: warningLevel(percentageUsed),
+            categories: categoryBreakdown,
         };
     }
     async remove(id) {
@@ -93,7 +127,10 @@ exports.TetConfigsService = TetConfigsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(tet_config_entity_1.TetConfig)),
     __param(1, (0, typeorm_1.InjectRepository)(todo_item_entity_1.TodoItem)),
+    __param(2, (0, typeorm_1.InjectRepository)(category_entity_1.Category)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        budget_calculations_service_1.BudgetCalculationsService])
 ], TetConfigsService);
 //# sourceMappingURL=tet_configs.service.js.map

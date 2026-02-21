@@ -4,9 +4,11 @@ import { UpdateTodoItemDto } from './dto/update-todo_item.dto';
 export declare class TodoItemsController {
     private readonly todoItemsService;
     constructor(todoItemsService: TodoItemsService);
-    create(createTodoItemDto: CreateTodoItemDto): string;
-    findAll(): string;
-    findOne(id: string): string;
-    update(id: string, updateTodoItemDto: UpdateTodoItemDto): string;
-    remove(id: string): string;
+    create(req: any, createDto: CreateTodoItemDto): Promise<import("./entities/todo_item.entity").TodoItem>;
+    findAll(req: any, tetConfigId: string, timelinePhaseId?: string): Promise<import("./entities/todo_item.entity").TodoItem[]>;
+    findOne(req: any, id: string): Promise<import("./entities/todo_item.entity").TodoItem>;
+    update(req: any, id: string, updateDto: UpdateTodoItemDto): Promise<import("./entities/todo_item.entity").TodoItem>;
+    remove(req: any, id: string): Promise<{
+        message: string;
+    }>;
 }

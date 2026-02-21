@@ -1,9 +1,13 @@
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { Repository } from 'typeorm';
+import { Notification } from './entities/notification.entity';
 export declare class NotificationsService {
-    create(createNotificationDto: CreateNotificationDto): string;
-    findAll(): string;
-    findOne(id: number): string;
-    update(id: number, updateNotificationDto: UpdateNotificationDto): string;
-    remove(id: number): string;
+    private readonly notificationRepository;
+    constructor(notificationRepository: Repository<Notification>);
+    createForTodoItem(userId: string, todoItemId: string, title: string): Promise<Notification>;
+    createForUser(userId: string, title: string): Promise<Notification>;
+    findAllByUser(userId: string): Promise<Notification[]>;
+    markRead(id: string, userId: string): Promise<Notification>;
+    markAllRead(userId: string): Promise<{
+        message: string;
+    }>;
 }

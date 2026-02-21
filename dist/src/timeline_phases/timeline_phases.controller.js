@@ -24,20 +24,20 @@ let TimelinePhasesController = class TimelinePhasesController {
     constructor(timelinePhasesService) {
         this.timelinePhasesService = timelinePhasesService;
     }
-    async create(createTimelinePhaseDto) {
-        return this.timelinePhasesService.create(createTimelinePhaseDto);
+    async create(req, createDto) {
+        return this.timelinePhasesService.create(req.user.userId, createDto);
     }
-    async findAllByTetConfig(tetConfigId) {
-        return this.timelinePhasesService.findAllByTetConfig(tetConfigId);
+    async findAllByTetConfig(req, tetConfigId) {
+        return this.timelinePhasesService.findAllByTetConfig(req.user.userId, tetConfigId);
     }
-    async findOne(id) {
-        return this.timelinePhasesService.findOne(id);
+    async findOne(req, id) {
+        return this.timelinePhasesService.findOne(req.user.userId, id);
     }
-    async update(id, updateTimelinePhaseDto) {
-        return this.timelinePhasesService.update(id, updateTimelinePhaseDto);
+    async update(req, id, updateDto) {
+        return this.timelinePhasesService.update(req.user.userId, id, updateDto);
     }
-    async remove(id) {
-        return this.timelinePhasesService.remove(id);
+    async remove(req, id) {
+        return this.timelinePhasesService.remove(req.user.userId, id);
     }
 };
 exports.TimelinePhasesController = TimelinePhasesController;
@@ -45,20 +45,22 @@ __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create a timeline phase for a tet config' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Timeline phase created successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
-    __param(0, (0, common_1.Body)()),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Access denied' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_timeline_phase_dto_1.CreateTimelinePhaseDto]),
+    __metadata("design:paramtypes", [Object, create_timeline_phase_dto_1.CreateTimelinePhaseDto]),
     __metadata("design:returntype", Promise)
 ], TimelinePhasesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)('tet-config/:tetConfigId'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all timeline phases for a tet config' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Timeline phases returned' }),
-    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
-    __param(0, (0, common_1.Param)('tetConfigId')),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Access denied' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('tetConfigId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], TimelinePhasesController.prototype, "findAllByTetConfig", null);
 __decorate([
@@ -66,10 +68,11 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get a timeline phase by ID' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Timeline phase returned' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Timeline phase not found' }),
-    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
-    __param(0, (0, common_1.Param)('id')),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Access denied' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], TimelinePhasesController.prototype, "findOne", null);
 __decorate([
@@ -77,11 +80,12 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Update a timeline phase' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Timeline phase updated successfully' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Timeline phase not found' }),
-    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Access denied' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_timeline_phase_dto_1.UpdateTimelinePhaseDto]),
+    __metadata("design:paramtypes", [Object, String, update_timeline_phase_dto_1.UpdateTimelinePhaseDto]),
     __metadata("design:returntype", Promise)
 ], TimelinePhasesController.prototype, "update", null);
 __decorate([
@@ -89,10 +93,11 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Delete a timeline phase' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Timeline phase deleted successfully' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Timeline phase not found' }),
-    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
-    __param(0, (0, common_1.Param)('id')),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Access denied' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], TimelinePhasesController.prototype, "remove", null);
 exports.TimelinePhasesController = TimelinePhasesController = __decorate([
