@@ -20,6 +20,15 @@ export class NotificationsService {
     return this.notificationRepository.save(notification);
   }
 
+  async createForUser(userId: string, title: string) {
+    const notification = this.notificationRepository.create({
+      title,
+      is_read: false,
+      user: { id: userId },
+    });
+    return this.notificationRepository.save(notification);
+  }
+
   async findAllByUser(userId: string) {
     return this.notificationRepository.find({
       where: { user: { id: userId } },
