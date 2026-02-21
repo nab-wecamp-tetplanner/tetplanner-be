@@ -1,0 +1,31 @@
+import { TodoPriority, TodoStatus } from '../../helper/enums';
+import { TetConfig } from '../../tet_configs/entities/tet_config.entity';
+import { TimelinePhase } from '../../timeline_phases/entities/timeline_phase.entity';
+import { Category } from '../../categories/entities/category.entity';
+import { User } from '../../users/entities/user.entity';
+import { BudgetTransaction } from '../../budget_transactions/entities/budget_transaction.entity';
+import { Notification } from '../../notifications/entities/notification.entity';
+export declare class TodoItem {
+    id: string;
+    title: string;
+    priority: TodoPriority;
+    status: TodoStatus;
+    deadline: Date;
+    is_overdue: boolean;
+    is_shopping: boolean;
+    estimated_price: number;
+    quantity: number;
+    purchased: boolean;
+    assigned_to: string;
+    subtasks: Record<string, boolean>;
+    done_percentage: number;
+    computeDonePercentage(): void;
+    created_at: Date;
+    deleted_at: Date;
+    tet_config: TetConfig;
+    timeline_phase: TimelinePhase;
+    category: Category;
+    assigned_to_user: User;
+    budget_transactions: BudgetTransaction[];
+    notifications: Notification[];
+}
