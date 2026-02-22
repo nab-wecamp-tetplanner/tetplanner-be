@@ -40,6 +40,32 @@ export class TodoItemsController {
     return this.todoItemsService.findOne(req.user.userId, id);
   }
 
+  @Patch(':id/purchase')
+  @ApiOperation({ summary: 'Toggle purchased state of a todo item and return updated budget summary' })
+  @ApiResponse({
+    status: 200,
+    description: 'Purchased flag toggled. Returns the updated todo item and the live budget summary for its Tết config.',
+    schema: {
+      properties: {
+        todo_item: { type: 'object' },
+        budget: {
+          properties: {
+            total_budget: { type: 'number' },
+            used_budget: { type: 'number' },
+            remaining_budget: { type: 'number' },
+            percentage_used: { type: 'number', description: '0-100' },
+            warning_level: { type: 'string', enum: ['ok', 'warning', 'critical'] },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Todo item not found' })
+  @ApiResponse({ status: 403, description: 'Access denied' })
+  async togglePurchased(@Req() req: any, @Param('id') id: string) {
+    return this.todoItemsService.togglePurchased(req.user.userId as string, id);
+  }
+
   @Patch(':id')
   @ApiOperation({ summary: 'Update a todo item' })
   @ApiResponse({ status: 200, description: 'Todo item updated successfully' })

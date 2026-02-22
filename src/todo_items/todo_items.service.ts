@@ -112,6 +112,39 @@ export class TodoItemsService {
     return { message: 'Todo item deleted successfully' };
   }
 
+  async togglePurchased(userId: string, id: string) {
+    const item = await this.todoItemRepository.findOne({
+      where: { id },
+      relations: ['tet_config'],
+    });
+    if (!item) throw new NotFoundException('Todo item not found');
+    await this.collaboratorsService.checkAccess(userId, item.tet_config.id);
+
+    const wasPurchased = item.purchased;
+    item.purchased = !wasPurchased;
+    const saved = await this.todoItemRepository.save(item);
+
+    const tetConfigId = item.tet_config.id;
+    const total = Number(item.tet_config.total_budget ?? 0);
+    const used = await this.budgetCalculationsService.calculateTotalUsed(tetConfigId);
+    const percentage_used = this.budgetCalculationsService.calculatePercentage(used, total);
+
+    if (!wasPurchased) {
+      await this.checkBudgetAndNotify(tetConfigId);
+    }
+
+    return {
+      todo_item: saved,
+      budget: {
+        total_budget: total,
+        used_budget: used,
+        remaining_budget: total - used,
+        percentage_used,
+        warning_level: percentage_used >= 100 ? 'critical' : percentage_used >= 80 ? 'warning' : 'ok',
+      },
+    };
+  }
+
   private async checkBudgetAndNotify(tetConfigId: string) {
     const tetConfig = await this.tetConfigRepository.findOne({
       where: { id: tetConfigId },
