@@ -5,6 +5,7 @@ export declare class Category {
     id: string;
     name: string;
     icon: string;
+    color: string;
     is_system: boolean;
     allocated_budget: number;
     deleted_at: Date;

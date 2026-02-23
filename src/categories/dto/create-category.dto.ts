@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsHexColor, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateCategoryDto {
   @ApiProperty({ type: String, description: 'Category name' })
@@ -11,6 +11,11 @@ export class CreateCategoryDto {
   @IsString()
   @IsOptional()
   icon?: string;
+
+  @ApiProperty({ type: String, description: 'Hex color code e.g. #FF5733', nullable: true })
+  @IsHexColor()
+  @IsOptional()
+  color?: string;
 
   @ApiProperty({ type: Number, description: 'Allocated budget', nullable: true })
   @IsNumber()

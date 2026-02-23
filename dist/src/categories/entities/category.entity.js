@@ -18,6 +18,7 @@ let Category = class Category {
     id;
     name;
     icon;
+    color;
     is_system;
     allocated_budget;
     deleted_at;
@@ -38,6 +39,10 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Category.prototype, "icon", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Category.prototype, "color", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: false }),
     __metadata("design:type", Boolean)

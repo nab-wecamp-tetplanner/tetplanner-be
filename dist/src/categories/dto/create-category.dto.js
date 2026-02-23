@@ -15,6 +15,7 @@ const class_validator_1 = require("class-validator");
 class CreateCategoryDto {
     name;
     icon;
+    color;
     allocated_budget;
     tet_config_id;
 }
@@ -31,6 +32,12 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateCategoryDto.prototype, "icon", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String, description: 'Hex color code e.g. #FF5733', nullable: true }),
+    (0, class_validator_1.IsHexColor)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateCategoryDto.prototype, "color", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Number, description: 'Allocated budget', nullable: true }),
     (0, class_validator_1.IsNumber)(),

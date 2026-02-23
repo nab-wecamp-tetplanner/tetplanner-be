@@ -15,6 +15,9 @@ export class Category {
   @Column({ nullable: true })
   icon: string;
 
+  @Column({ nullable: true })
+  color: string;
+
   @Column({ default: false })
   is_system: boolean;
 
