@@ -10,7 +10,7 @@ import { UpdateTodoItemDto } from './dto/update-todo_item.dto';
 import { CollaboratorsService } from '../collaborators/collaborators.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { BudgetCalculationsService } from '../helper/budget-calculations.service';
-import { TransactionType } from '../helper/enums';
+import { TodoStatus, TransactionType } from '../helper/enums';
 
 @Injectable()
 export class TodoItemsService {
@@ -63,21 +63,64 @@ export class TodoItemsService {
   async update(userId: string, id: string, updateDto: UpdateTodoItemDto) {
     const item = await this.todoItemRepository.findOne({
       where: { id },
-      relations: ['tet_config'],
+      relations: ['tet_config', 'category'],
     });
     if (!item) throw new NotFoundException('Todo item not found');
     await this.collaboratorsService.checkAccess(userId, item.tet_config.id);
 
-    const wasPurchased = item.purchased;
-    Object.assign(item, updateDto);
-    const saved = await this.todoItemRepository.save(item);
+    const wasCompleted = item.status === TodoStatus.COMPLETED;
+    const hadCost = item.estimated_price != null;
 
-    // check and notify
-    if (!wasPurchased && saved.purchased) {
-      await this.checkBudgetAndNotify(saved.tet_config.id);
+    Object.assign(item, updateDto);
+
+    const isNowCompleted = item.status === TodoStatus.COMPLETED;
+    const hasCost = item.estimated_price != null;
+
+    if (!wasCompleted && isNowCompleted && hasCost) {
+      item.purchased = true;
+    } else if (wasCompleted && !isNowCompleted && hadCost) {
+      item.purchased = false;
     }
 
-    return saved;
+    const saved = await this.todoItemRepository.save(item);
+    const tetConfigId = item.tet_config.id;
+    const total = Number(item.tet_config.total_budget ?? 0);
+
+    if (!wasCompleted && isNowCompleted && hasCost) {
+      const amount = Number(item.estimated_price) * (item.quantity ?? 1);
+      const tx = this.budgetTransactionRepository.create({
+        amount,
+        type: TransactionType.EXPENSE,
+        note: `Completed: ${item.title}`,
+        transaction_date: new Date(),
+        tet_config: { id: tetConfigId },
+        category: item.category ? { id: item.category.id } : undefined,
+        todo_item: { id: item.id },
+        recorded_by_user: { id: userId },
+      });
+      await this.budgetTransactionRepository.save(tx);
+      await this.checkBudgetAndNotify(tetConfigId);
+    } else if (wasCompleted && !isNowCompleted && hadCost) {
+      const tx = await this.budgetTransactionRepository.findOne({ where: { todo_item: { id: item.id } } });
+      if (tx) await this.budgetTransactionRepository.remove(tx);
+    }
+
+    const [used, planned] = await Promise.all([this.budgetCalculationsService.calculateTotalUsed(tetConfigId), this.budgetCalculationsService.calculateTotalPlanned(tetConfigId)]);
+    const percentage_used = this.budgetCalculationsService.calculatePercentage(used, total);
+    const percentage_planned = this.budgetCalculationsService.calculatePercentage(planned, total);
+
+    return {
+      todo_item: saved,
+      budget: {
+        total_budget: total,
+        planned_budget: planned,
+        used_budget: used,
+        remaining_budget: total - planned,
+        percentage_used,
+        percentage_planned,
+        warning_level: percentage_planned >= 100 ? 'critical' : percentage_planned >= 80 ? 'warning' : 'ok',
+      },
+    };
   }
 
   async upsertSubtask(userId: string, id: string, name: string, done: boolean) {
@@ -114,62 +157,6 @@ export class TodoItemsService {
     await this.collaboratorsService.checkAccess(userId, item.tet_config.id);
     await this.todoItemRepository.softRemove(item);
     return { message: 'Todo item deleted successfully' };
-  }
-
-  async togglePurchased(userId: string, id: string) {
-    const item = await this.todoItemRepository.findOne({
-      where: { id },
-      relations: ['tet_config', 'category'],
-    });
-    if (!item) throw new NotFoundException('Todo item not found');
-    await this.collaboratorsService.checkAccess(userId, item.tet_config.id);
-
-    const wasPurchased = item.purchased;
-    item.purchased = !wasPurchased;
-    const saved = await this.todoItemRepository.save(item);
-
-    const tetConfigId = item.tet_config.id;
-    const total = Number(item.tet_config.total_budget ?? 0);
-
-    if (!wasPurchased) {
-      // create an expense transaction as audit trail
-      const amount = Number(item.estimated_price ?? 0) * (item.quantity ?? 1);
-      const tx = this.budgetTransactionRepository.create({
-        amount,
-        type: TransactionType.EXPENSE,
-        note: `Purchased: ${item.title}`,
-        transaction_date: new Date(),
-        tet_config: { id: tetConfigId },
-        category: item.category ? { id: item.category.id } : undefined,
-        todo_item: { id: item.id },
-        recorded_by_user: { id: userId },
-      });
-      await this.budgetTransactionRepository.save(tx);
-      await this.checkBudgetAndNotify(tetConfigId);
-    } else {
-      // remove the linked transaction when un-purchasing
-      const tx = await this.budgetTransactionRepository.findOne({
-        where: { todo_item: { id: item.id } },
-      });
-      if (tx) await this.budgetTransactionRepository.remove(tx);
-    }
-
-    const [used, planned] = await Promise.all([this.budgetCalculationsService.calculateTotalUsed(tetConfigId), this.budgetCalculationsService.calculateTotalPlanned(tetConfigId)]);
-    const percentage_used = this.budgetCalculationsService.calculatePercentage(used, total);
-    const percentage_planned = this.budgetCalculationsService.calculatePercentage(planned, total);
-
-    return {
-      todo_item: saved,
-      budget: {
-        total_budget: total,
-        planned_budget: planned,
-        used_budget: used,
-        remaining_budget: total - planned,
-        percentage_used,
-        percentage_planned,
-        warning_level: percentage_planned >= 100 ? 'critical' : percentage_planned >= 80 ? 'warning' : 'ok',
-      },
-    };
   }
 
   private async checkBudgetAndNotify(tetConfigId: string) {

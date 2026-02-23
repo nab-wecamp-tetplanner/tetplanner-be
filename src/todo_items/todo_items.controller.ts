@@ -18,7 +18,7 @@ export class TodoItemsController {
   @ApiResponse({ status: 201, description: 'Todo item created successfully' })
   @ApiResponse({ status: 403, description: 'Access denied' })
   async create(@Req() req: any, @Body() createDto: CreateTodoItemDto) {
-    return this.todoItemsService.create(req.user.userId, createDto);
+    return this.todoItemsService.create(req.user.userId as string, createDto);
   }
 
   @Get()
@@ -28,7 +28,7 @@ export class TodoItemsController {
   @ApiResponse({ status: 200, description: 'Todo items returned' })
   @ApiResponse({ status: 403, description: 'Access denied' })
   async findAll(@Req() req: any, @Query('tet_config_id') tetConfigId: string, @Query('timeline_phase_id') timelinePhaseId?: string) {
-    return this.todoItemsService.findAllByTetConfig(req.user.userId, tetConfigId, timelinePhaseId);
+    return this.todoItemsService.findAllByTetConfig(req.user.userId as string, tetConfigId, timelinePhaseId);
   }
 
   @Get(':id')
@@ -37,33 +37,7 @@ export class TodoItemsController {
   @ApiResponse({ status: 404, description: 'Todo item not found' })
   @ApiResponse({ status: 403, description: 'Access denied' })
   async findOne(@Req() req: any, @Param('id') id: string) {
-    return this.todoItemsService.findOne(req.user.userId, id);
-  }
-
-  @Patch(':id/purchase')
-  @ApiOperation({ summary: 'Toggle purchased state of a todo item and return updated budget summary' })
-  @ApiResponse({
-    status: 200,
-    description: 'Purchased flag toggled. Returns the updated todo item and the live budget summary for its Tết config.',
-    schema: {
-      properties: {
-        todo_item: { type: 'object' },
-        budget: {
-          properties: {
-            total_budget: { type: 'number' },
-            used_budget: { type: 'number' },
-            remaining_budget: { type: 'number' },
-            percentage_used: { type: 'number', description: '0-100' },
-            warning_level: { type: 'string', enum: ['ok', 'warning', 'critical'] },
-          },
-        },
-      },
-    },
-  })
-  @ApiResponse({ status: 404, description: 'Todo item not found' })
-  @ApiResponse({ status: 403, description: 'Access denied' })
-  async togglePurchased(@Req() req: any, @Param('id') id: string) {
-    return this.todoItemsService.togglePurchased(req.user.userId as string, id);
+    return this.todoItemsService.findOne(req.user.userId as string, id);
   }
 
   @Patch(':id')
@@ -72,7 +46,7 @@ export class TodoItemsController {
   @ApiResponse({ status: 404, description: 'Todo item not found' })
   @ApiResponse({ status: 403, description: 'Access denied' })
   async update(@Req() req: any, @Param('id') id: string, @Body() updateDto: UpdateTodoItemDto) {
-    return this.todoItemsService.update(req.user.userId, id, updateDto);
+    return this.todoItemsService.update(req.user.userId as string, id, updateDto);
   }
 
   @Put(':id/subtasks')
@@ -81,7 +55,7 @@ export class TodoItemsController {
   @ApiResponse({ status: 404, description: 'Todo item not found' })
   @ApiResponse({ status: 403, description: 'Access denied' })
   async upsertSubtask(@Req() req: any, @Param('id') id: string, @Body() dto: UpsertSubtaskDto) {
-    return this.todoItemsService.upsertSubtask(req.user.userId, id, dto.name, dto.done ?? false);
+    return this.todoItemsService.upsertSubtask(req.user.userId as string, id, dto.name, dto.done ?? false);
   }
 
   @Delete(':id/subtasks')
@@ -90,7 +64,7 @@ export class TodoItemsController {
   @ApiResponse({ status: 404, description: 'Todo item not found' })
   @ApiResponse({ status: 403, description: 'Access denied' })
   async removeSubtask(@Req() req: any, @Param('id') id: string, @Body() dto: RemoveSubtaskDto) {
-    return this.todoItemsService.removeSubtask(req.user.userId, id, dto.name);
+    return this.todoItemsService.removeSubtask(req.user.userId as string, id, dto.name);
   }
 
   @Delete(':id')
@@ -99,6 +73,6 @@ export class TodoItemsController {
   @ApiResponse({ status: 404, description: 'Todo item not found' })
   @ApiResponse({ status: 403, description: 'Access denied' })
   async remove(@Req() req: any, @Param('id') id: string) {
-    return this.todoItemsService.remove(req.user.userId, id);
+    return this.todoItemsService.remove(req.user.userId as string, id);
   }
 }
