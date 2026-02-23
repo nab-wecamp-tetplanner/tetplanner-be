@@ -8,8 +8,10 @@ export declare class TetConfigsController {
     findAll(req: any): Promise<import("./entities/tet_config.entity").TetConfig[]>;
     getBudgetSummary(id: string): Promise<{
         total_budget: number;
+        planned_budget: number;
         used_budget: number;
         remaining_budget: number;
+        percentage_planned: number;
         percentage_used: number;
         warning_level: "ok" | "warning" | "critical";
         categories: {
@@ -17,8 +19,10 @@ export declare class TetConfigsController {
             name: string;
             icon: string;
             allocated_budget: number | null;
+            planned_budget: number;
             used_budget: number;
             remaining_budget: number | null;
+            percentage_planned: number | null;
             percentage_used: number | null;
             warning_level: string;
         }[];

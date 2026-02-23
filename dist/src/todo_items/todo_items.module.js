@@ -14,6 +14,8 @@ const todo_items_controller_1 = require("./todo_items.controller");
 const todo_item_entity_1 = require("./entities/todo_item.entity");
 const tet_config_entity_1 = require("../tet_configs/entities/tet_config.entity");
 const collaborator_entity_1 = require("../collaborators/entities/collaborator.entity");
+const budget_transaction_entity_1 = require("../budget_transactions/entities/budget_transaction.entity");
+const timeline_phase_entity_1 = require("../timeline_phases/entities/timeline_phase.entity");
 const collaborators_module_1 = require("../collaborators/collaborators.module");
 const notifications_module_1 = require("../notifications/notifications.module");
 const budget_calculations_service_1 = require("../helper/budget-calculations.service");
@@ -22,7 +24,7 @@ let TodoItemsModule = class TodoItemsModule {
 exports.TodoItemsModule = TodoItemsModule;
 exports.TodoItemsModule = TodoItemsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([todo_item_entity_1.TodoItem, tet_config_entity_1.TetConfig, collaborator_entity_1.Collaborator]), collaborators_module_1.CollaboratorsModule, notifications_module_1.NotificationsModule],
+        imports: [typeorm_1.TypeOrmModule.forFeature([todo_item_entity_1.TodoItem, tet_config_entity_1.TetConfig, collaborator_entity_1.Collaborator, budget_transaction_entity_1.BudgetTransaction, timeline_phase_entity_1.TimelinePhase]), collaborators_module_1.CollaboratorsModule, notifications_module_1.NotificationsModule],
         controllers: [todo_items_controller_1.TodoItemsController],
         providers: [todo_items_service_1.TodoItemsService, budget_calculations_service_1.BudgetCalculationsService],
     })

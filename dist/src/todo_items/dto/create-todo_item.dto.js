@@ -68,9 +68,10 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateTodoItemDto.prototype, "is_shopping", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: Number, description: 'Estimated price', nullable: true }),
+    (0, swagger_1.ApiProperty)({ type: Number, description: 'Estimated price. Required when is_shopping = true.', nullable: true }),
+    (0, class_validator_1.ValidateIf)((o) => o.is_shopping === true),
+    (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], CreateTodoItemDto.prototype, "estimated_price", void 0);
 __decorate([
@@ -109,9 +110,10 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTodoItemDto.prototype, "timeline_phase_id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: String, description: 'Category ID' }),
-    (0, class_validator_1.IsUUID)('4'),
+    (0, swagger_1.ApiProperty)({ type: String, description: 'Category ID. Required when is_shopping = true.', nullable: true }),
+    (0, class_validator_1.ValidateIf)((o) => o.is_shopping === true),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsUUID)('4'),
     __metadata("design:type", String)
 ], CreateTodoItemDto.prototype, "category_id", void 0);
 //# sourceMappingURL=create-todo_item.dto.js.map

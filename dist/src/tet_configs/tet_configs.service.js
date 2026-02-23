@@ -17,7 +17,6 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const tet_config_entity_1 = require("./entities/tet_config.entity");
-const todo_item_entity_1 = require("../todo_items/entities/todo_item.entity");
 const category_entity_1 = require("../categories/entities/category.entity");
 const budget_calculations_service_1 = require("../helper/budget-calculations.service");
 function warningLevel(percentage) {
@@ -29,12 +28,10 @@ function warningLevel(percentage) {
 }
 let TetConfigsService = class TetConfigsService {
     tetConfigRepository;
-    todoItemRepository;
     categoryRepository;
     budgetCalculationsService;
-    constructor(tetConfigRepository, todoItemRepository, categoryRepository, budgetCalculationsService) {
+    constructor(tetConfigRepository, categoryRepository, budgetCalculationsService) {
         this.tetConfigRepository = tetConfigRepository;
-        this.todoItemRepository = todoItemRepository;
         this.categoryRepository = categoryRepository;
         this.budgetCalculationsService = budgetCalculationsService;
     }
@@ -70,8 +67,12 @@ let TetConfigsService = class TetConfigsService {
     }
     async updateBudget(id, totalBudget) {
         const tetConfig = await this.tetConfigRepository.findOne({ where: { id } });
-        if (!tetConfig) {
+        if (!tetConfig)
             throw new common_1.NotFoundException('Tet config not found');
+        const categories = await this.categoryRepository.find({ where: { tet_config: { id } } });
+        const alreadyAllocated = categories.reduce((sum, c) => sum + Number(c.allocated_budget ?? 0), 0);
+        if (totalBudget < alreadyAllocated) {
+            throw new common_1.BadRequestException(`New total budget (${totalBudget}) is less than already allocated category budgets (${alreadyAllocated})`);
         }
         tetConfig.total_budget = totalBudget;
         return this.tetConfigRepository.save(tetConfig);
@@ -80,36 +81,41 @@ let TetConfigsService = class TetConfigsService {
         const tetConfig = await this.tetConfigRepository.findOne({ where: { id } });
         if (!tetConfig)
             throw new common_1.NotFoundException('Tet config not found');
-        const usedBudget = await this.budgetCalculationsService.calculateTotalUsed(id);
         const totalBudget = Number(tetConfig.total_budget);
-        const remainingBudget = totalBudget - usedBudget;
+        const [usedBudget, plannedBudget, usedByCategory, plannedByCategory] = await Promise.all([this.budgetCalculationsService.calculateTotalUsed(id), this.budgetCalculationsService.calculateTotalPlanned(id), this.budgetCalculationsService.calculateUsedByCategory(id), this.budgetCalculationsService.calculatePlannedByCategory(id)]);
         const percentageUsed = this.budgetCalculationsService.calculatePercentage(usedBudget, totalBudget);
+        const percentagePlanned = this.budgetCalculationsService.calculatePercentage(plannedBudget, totalBudget);
         const categories = await this.categoryRepository.find({
             where: { tet_config: { id } },
         });
-        const usedByCategory = await this.budgetCalculationsService.calculateUsedByCategory(id);
         const categoryBreakdown = categories.map((cat) => {
             const catUsed = usedByCategory.get(cat.id) ?? 0;
+            const catPlanned = plannedByCategory.get(cat.id) ?? 0;
             const catAllocated = cat.allocated_budget ? Number(cat.allocated_budget) : null;
-            const catRemaining = catAllocated !== null ? catAllocated - catUsed : null;
-            const catPercentage = catAllocated && catAllocated > 0 ? this.budgetCalculationsService.calculatePercentage(catUsed, catAllocated) : null;
+            const catRemaining = catAllocated !== null ? catAllocated - catPlanned : null;
+            const catPercentagePlanned = catAllocated && catAllocated > 0 ? this.budgetCalculationsService.calculatePercentage(catPlanned, catAllocated) : null;
+            const catPercentageUsed = catAllocated && catAllocated > 0 ? this.budgetCalculationsService.calculatePercentage(catUsed, catAllocated) : null;
             return {
                 id: cat.id,
                 name: cat.name,
                 icon: cat.icon,
                 allocated_budget: catAllocated,
+                planned_budget: catPlanned,
                 used_budget: catUsed,
                 remaining_budget: catRemaining,
-                percentage_used: catPercentage,
-                warning_level: catPercentage !== null ? warningLevel(catPercentage) : 'no_limit',
+                percentage_planned: catPercentagePlanned,
+                percentage_used: catPercentageUsed,
+                warning_level: catPercentagePlanned !== null ? warningLevel(catPercentagePlanned) : 'no_limit',
             };
         });
         return {
             total_budget: totalBudget,
+            planned_budget: plannedBudget,
             used_budget: usedBudget,
-            remaining_budget: remainingBudget,
+            remaining_budget: totalBudget - plannedBudget,
+            percentage_planned: percentagePlanned,
             percentage_used: percentageUsed,
-            warning_level: warningLevel(percentageUsed),
+            warning_level: warningLevel(percentagePlanned),
             categories: categoryBreakdown,
         };
     }
@@ -126,10 +132,8 @@ exports.TetConfigsService = TetConfigsService;
 exports.TetConfigsService = TetConfigsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(tet_config_entity_1.TetConfig)),
-    __param(1, (0, typeorm_1.InjectRepository)(todo_item_entity_1.TodoItem)),
-    __param(2, (0, typeorm_1.InjectRepository)(category_entity_1.Category)),
+    __param(1, (0, typeorm_1.InjectRepository)(category_entity_1.Category)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository,
         typeorm_2.Repository,
         budget_calculations_service_1.BudgetCalculationsService])
 ], TetConfigsService);

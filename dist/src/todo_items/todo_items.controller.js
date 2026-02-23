@@ -31,6 +31,9 @@ let TodoItemsController = class TodoItemsController {
     async findAll(req, tetConfigId, timelinePhaseId) {
         return this.todoItemsService.findAllByTetConfig(req.user.userId, tetConfigId, timelinePhaseId);
     }
+    async findAllByPhase(req, phaseId) {
+        return this.todoItemsService.findAllByTimelinePhase(req.user.userId, phaseId);
+    }
     async findOne(req, id) {
         return this.todoItemsService.findOne(req.user.userId, id);
     }
@@ -73,6 +76,18 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], TodoItemsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('phase/:phaseId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all todo items by timeline phase ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Todo items returned' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Timeline phase not found' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Access denied' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('phaseId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], TodoItemsController.prototype, "findAllByPhase", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get a todo item by ID' }),

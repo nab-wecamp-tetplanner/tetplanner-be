@@ -30,6 +30,14 @@ let BudgetCalculationsService = class BudgetCalculationsService {
         const categoryRows = await this.todoItemRepository.createQueryBuilder('todo').select('todo.category_id', 'category_id').addSelect('COALESCE(SUM(todo.estimated_price * todo.quantity), 0)', 'used_budget').where('todo.tet_config_id = :id', { id: tetConfigId }).andWhere('todo.purchased = :purchased', { purchased: true }).groupBy('todo.category_id').getRawMany();
         return new Map(categoryRows.map((r) => [r.category_id, parseFloat(r.used_budget)]));
     }
+    async calculateTotalPlanned(tetConfigId) {
+        const result = await this.todoItemRepository.createQueryBuilder('todo').select('COALESCE(SUM(todo.estimated_price * todo.quantity), 0)', 'planned').where('todo.tet_config_id = :id', { id: tetConfigId }).getRawOne();
+        return parseFloat(result?.planned ?? '0');
+    }
+    async calculatePlannedByCategory(tetConfigId) {
+        const categoryRows = await this.todoItemRepository.createQueryBuilder('todo').select('todo.category_id', 'category_id').addSelect('COALESCE(SUM(todo.estimated_price * todo.quantity), 0)', 'planned_budget').where('todo.tet_config_id = :id', { id: tetConfigId }).groupBy('todo.category_id').getRawMany();
+        return new Map(categoryRows.map((r) => [r.category_id, parseFloat(r.planned_budget)]));
+    }
     calculatePercentage(used, total) {
         return total > 0 ? Math.round((used / total) * 100) : 0;
     }

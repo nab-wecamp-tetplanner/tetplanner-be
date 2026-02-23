@@ -11,5 +11,5 @@ export declare class CreateTodoItemDto {
     subtasks?: Record<string, boolean>;
     tet_config_id: string;
     timeline_phase_id: string;
-    category_id: string;
+    category_id?: string;
 }
