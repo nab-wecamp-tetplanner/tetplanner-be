@@ -5,6 +5,7 @@ import { TodoItem } from './entities/todo_item.entity';
 import { TetConfig } from '../tet_configs/entities/tet_config.entity';
 import { Collaborator } from '../collaborators/entities/collaborator.entity';
 import { BudgetTransaction } from '../budget_transactions/entities/budget_transaction.entity';
+import { TimelinePhase } from '../timeline_phases/entities/timeline_phase.entity';
 import { CreateTodoItemDto } from './dto/create-todo_item.dto';
 import { UpdateTodoItemDto } from './dto/update-todo_item.dto';
 import { CollaboratorsService } from '../collaborators/collaborators.service';
@@ -23,6 +24,8 @@ export class TodoItemsService {
     private readonly collaboratorRepository: Repository<Collaborator>,
     @InjectRepository(BudgetTransaction)
     private readonly budgetTransactionRepository: Repository<BudgetTransaction>,
+    @InjectRepository(TimelinePhase)
+    private readonly timelinePhaseRepository: Repository<TimelinePhase>,
     private readonly collaboratorsService: CollaboratorsService,
     private readonly notificationsService: NotificationsService,
     private readonly budgetCalculationsService: BudgetCalculationsService,
@@ -51,6 +54,21 @@ export class TodoItemsService {
     if (timelinePhaseId) where.timeline_phase = { id: timelinePhaseId };
     return this.todoItemRepository.find({
       where,
+      relations: ['category', 'assigned_to_user', 'timeline_phase'],
+      order: { created_at: 'ASC' },
+    });
+  }
+
+  async findAllByTimelinePhase(userId: string, phaseId: string) {
+    const phase = await this.timelinePhaseRepository.findOne({
+      where: { id: phaseId },
+      relations: ['tet_config'],
+    });
+    if (!phase) throw new NotFoundException('Timeline phase not found');
+    await this.collaboratorsService.checkAccess(userId, phase.tet_config.id);
+    return this.todoItemRepository.find({
+      where: { timeline_phase: { id: phaseId } },
+      relations: ['category', 'assigned_to_user'],
       order: { created_at: 'ASC' },
     });
   }
@@ -58,7 +76,7 @@ export class TodoItemsService {
   async findOne(userId: string, id: string) {
     const item = await this.todoItemRepository.findOne({
       where: { id },
-      relations: ['tet_config'],
+      relations: ['tet_config', 'category', 'assigned_to_user', 'timeline_phase'],
     });
     if (!item) throw new NotFoundException('Todo item not found');
     await this.collaboratorsService.checkAccess(userId, item.tet_config.id);

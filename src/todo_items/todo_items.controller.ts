@@ -32,6 +32,15 @@ export class TodoItemsController {
     return this.todoItemsService.findAllByTetConfig(req.user.userId, tetConfigId, timelinePhaseId);
   }
 
+  @Get('phase/:phaseId')
+  @ApiOperation({ summary: 'Get all todo items by timeline phase ID' })
+  @ApiResponse({ status: 200, description: 'Todo items returned' })
+  @ApiResponse({ status: 404, description: 'Timeline phase not found' })
+  @ApiResponse({ status: 403, description: 'Access denied' })
+  async findAllByPhase(@Req() req: AuthRequest, @Param('phaseId') phaseId: string) {
+    return this.todoItemsService.findAllByTimelinePhase(req.user.userId, phaseId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a todo item by ID' })
   @ApiResponse({ status: 200, description: 'Todo item returned' })
