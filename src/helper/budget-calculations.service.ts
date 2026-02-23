@@ -22,6 +22,18 @@ export class BudgetCalculationsService {
     return new Map(categoryRows.map((r) => [r.category_id, parseFloat(r.used_budget)]));
   }
 
+  async calculateTotalPlanned(tetConfigId: string): Promise<number> {
+    const result = await this.todoItemRepository.createQueryBuilder('todo').select('COALESCE(SUM(todo.estimated_price * todo.quantity), 0)', 'planned').where('todo.tet_config_id = :id', { id: tetConfigId }).getRawOne<{ planned: string }>();
+
+    return parseFloat(result?.planned ?? '0');
+  }
+
+  async calculatePlannedByCategory(tetConfigId: string): Promise<Map<string, number>> {
+    const categoryRows = await this.todoItemRepository.createQueryBuilder('todo').select('todo.category_id', 'category_id').addSelect('COALESCE(SUM(todo.estimated_price * todo.quantity), 0)', 'planned_budget').where('todo.tet_config_id = :id', { id: tetConfigId }).groupBy('todo.category_id').getRawMany<{ category_id: string; planned_budget: string }>();
+
+    return new Map(categoryRows.map((r) => [r.category_id, parseFloat(r.planned_budget)]));
+  }
+
   calculatePercentage(used: number, total: number): number {
     return total > 0 ? Math.round((used / total) * 100) : 0;
   }

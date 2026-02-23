@@ -4,11 +4,13 @@ import { Repository } from 'typeorm';
 import { TodoItem } from './entities/todo_item.entity';
 import { TetConfig } from '../tet_configs/entities/tet_config.entity';
 import { Collaborator } from '../collaborators/entities/collaborator.entity';
+import { BudgetTransaction } from '../budget_transactions/entities/budget_transaction.entity';
 import { CreateTodoItemDto } from './dto/create-todo_item.dto';
 import { UpdateTodoItemDto } from './dto/update-todo_item.dto';
 import { CollaboratorsService } from '../collaborators/collaborators.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { BudgetCalculationsService } from '../helper/budget-calculations.service';
+import { TransactionType } from '../helper/enums';
 
 @Injectable()
 export class TodoItemsService {
@@ -19,6 +21,8 @@ export class TodoItemsService {
     private readonly tetConfigRepository: Repository<TetConfig>,
     @InjectRepository(Collaborator)
     private readonly collaboratorRepository: Repository<Collaborator>,
+    @InjectRepository(BudgetTransaction)
+    private readonly budgetTransactionRepository: Repository<BudgetTransaction>,
     private readonly collaboratorsService: CollaboratorsService,
     private readonly notificationsService: NotificationsService,
     private readonly budgetCalculationsService: BudgetCalculationsService,
@@ -115,7 +119,7 @@ export class TodoItemsService {
   async togglePurchased(userId: string, id: string) {
     const item = await this.todoItemRepository.findOne({
       where: { id },
-      relations: ['tet_config'],
+      relations: ['tet_config', 'category'],
     });
     if (!item) throw new NotFoundException('Todo item not found');
     await this.collaboratorsService.checkAccess(userId, item.tet_config.id);
@@ -126,21 +130,44 @@ export class TodoItemsService {
 
     const tetConfigId = item.tet_config.id;
     const total = Number(item.tet_config.total_budget ?? 0);
-    const used = await this.budgetCalculationsService.calculateTotalUsed(tetConfigId);
-    const percentage_used = this.budgetCalculationsService.calculatePercentage(used, total);
 
     if (!wasPurchased) {
+      // create an expense transaction as audit trail
+      const amount = Number(item.estimated_price ?? 0) * (item.quantity ?? 1);
+      const tx = this.budgetTransactionRepository.create({
+        amount,
+        type: TransactionType.EXPENSE,
+        note: `Purchased: ${item.title}`,
+        transaction_date: new Date(),
+        tet_config: { id: tetConfigId },
+        category: item.category ? { id: item.category.id } : undefined,
+        todo_item: { id: item.id },
+        recorded_by_user: { id: userId },
+      });
+      await this.budgetTransactionRepository.save(tx);
       await this.checkBudgetAndNotify(tetConfigId);
+    } else {
+      // remove the linked transaction when un-purchasing
+      const tx = await this.budgetTransactionRepository.findOne({
+        where: { todo_item: { id: item.id } },
+      });
+      if (tx) await this.budgetTransactionRepository.remove(tx);
     }
+
+    const [used, planned] = await Promise.all([this.budgetCalculationsService.calculateTotalUsed(tetConfigId), this.budgetCalculationsService.calculateTotalPlanned(tetConfigId)]);
+    const percentage_used = this.budgetCalculationsService.calculatePercentage(used, total);
+    const percentage_planned = this.budgetCalculationsService.calculatePercentage(planned, total);
 
     return {
       todo_item: saved,
       budget: {
         total_budget: total,
+        planned_budget: planned,
         used_budget: used,
-        remaining_budget: total - used,
+        remaining_budget: total - planned,
         percentage_used,
-        warning_level: percentage_used >= 100 ? 'critical' : percentage_used >= 80 ? 'warning' : 'ok',
+        percentage_planned,
+        warning_level: percentage_planned >= 100 ? 'critical' : percentage_planned >= 80 ? 'warning' : 'ok',
       },
     };
   }
