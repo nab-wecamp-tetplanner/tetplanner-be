@@ -108,9 +108,11 @@ export class TodoItemsService {
     const isNowCompleted = item.status === TodoStatus.COMPLETED;
     const hasCost = item.estimated_price != null;
 
-    const categoryId = updateDto.category_id ?? item.category?.id;
-    if (item.is_shopping && (!categoryId || item.estimated_price == null)) {
-      throw new BadRequestException('Shopping items require a category and an estimated price');
+    if (updateDto.is_shopping === true) {
+      const effectiveCategoryId = updateDto.category_id ?? item.category?.id;
+      if (!effectiveCategoryId || item.estimated_price == null) {
+        throw new BadRequestException('Shopping items require a category and an estimated price');
+      }
     }
 
     if (!wasCompleted && isNowCompleted && hasCost) {
