@@ -11,7 +11,7 @@ export declare class TodoItemsController {
     findAllByPhase(req: AuthRequest, phaseId: string): Promise<import("./entities/todo_item.entity").TodoItem[]>;
     findOne(req: AuthRequest, id: string): Promise<import("./entities/todo_item.entity").TodoItem>;
     update(req: AuthRequest, id: string, updateDto: UpdateTodoItemDto): Promise<{
-        todo_item: import("./entities/todo_item.entity").TodoItem;
+        todo_item: import("./entities/todo_item.entity").TodoItem | null;
         budget: {
             total_budget: number;
             planned_budget: number;

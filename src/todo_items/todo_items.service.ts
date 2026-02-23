@@ -86,7 +86,7 @@ export class TodoItemsService {
   async update(userId: string, id: string, updateDto: UpdateTodoItemDto) {
     const item = await this.todoItemRepository.findOne({
       where: { id },
-      relations: ['tet_config', 'category'],
+      relations: ['tet_config', 'category', 'timeline_phase'],
     });
     if (!item) throw new NotFoundException('Todo item not found');
     await this.collaboratorsService.checkAccess(userId, item.tet_config.id);
@@ -95,6 +95,15 @@ export class TodoItemsService {
     const hadCost = item.estimated_price != null;
 
     Object.assign(item, updateDto);
+
+    if (updateDto.timeline_phase_id !== undefined) {
+      const phase = await this.timelinePhaseRepository.findOne({ where: { id: updateDto.timeline_phase_id } });
+      if (!phase) throw new NotFoundException('Timeline phase not found');
+      item.timeline_phase = phase;
+    }
+    if (updateDto.category_id !== undefined) {
+      item.category = updateDto.category_id ? ({ id: updateDto.category_id } as any) : null;
+    }
 
     const isNowCompleted = item.status === TodoStatus.COMPLETED;
     const hasCost = item.estimated_price != null;
@@ -110,7 +119,11 @@ export class TodoItemsService {
       item.purchased = false;
     }
 
-    const saved = await this.todoItemRepository.save(item);
+    await this.todoItemRepository.save(item);
+    const saved = await this.todoItemRepository.findOne({
+      where: { id: item.id },
+      relations: ['category', 'assigned_to_user', 'timeline_phase'],
+    });
     const tetConfigId = item.tet_config.id;
     const total = Number(item.tet_config.total_budget ?? 0);
 

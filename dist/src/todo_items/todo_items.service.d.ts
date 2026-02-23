@@ -24,7 +24,7 @@ export declare class TodoItemsService {
     findAllByTimelinePhase(userId: string, phaseId: string): Promise<TodoItem[]>;
     findOne(userId: string, id: string): Promise<TodoItem>;
     update(userId: string, id: string, updateDto: UpdateTodoItemDto): Promise<{
-        todo_item: TodoItem;
+        todo_item: TodoItem | null;
         budget: {
             total_budget: number;
             planned_budget: number;

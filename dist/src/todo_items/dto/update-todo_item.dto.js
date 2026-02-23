@@ -14,7 +14,7 @@ const mapped_types_1 = require("@nestjs/mapped-types");
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 const create_todo_item_dto_1 = require("./create-todo_item.dto");
-class UpdateTodoItemDto extends (0, mapped_types_1.PartialType)(create_todo_item_dto_1.CreateTodoItemDto) {
+class UpdateTodoItemDto extends (0, mapped_types_1.PartialType)((0, mapped_types_1.OmitType)(create_todo_item_dto_1.CreateTodoItemDto, ['tet_config_id'])) {
     category_id;
     estimated_price;
 }
