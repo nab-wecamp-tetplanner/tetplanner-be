@@ -5,6 +5,7 @@ import { CreateTodoItemDto } from './dto/create-todo_item.dto';
 import { UpdateTodoItemDto } from './dto/update-todo_item.dto';
 import { UpsertSubtaskDto, RemoveSubtaskDto } from './dto/subtask.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import type { AuthRequest } from '../helper/interfaces/auth-request.interface';
 
 @ApiTags('todo-items')
 @ApiBearerAuth()
@@ -17,8 +18,8 @@ export class TodoItemsController {
   @ApiOperation({ summary: 'Create a new todo item' })
   @ApiResponse({ status: 201, description: 'Todo item created successfully' })
   @ApiResponse({ status: 403, description: 'Access denied' })
-  async create(@Req() req: any, @Body() createDto: CreateTodoItemDto) {
-    return this.todoItemsService.create(req.user.userId as string, createDto);
+  async create(@Req() req: AuthRequest, @Body() createDto: CreateTodoItemDto) {
+    return this.todoItemsService.create(req.user.userId, createDto);
   }
 
   @Get()
@@ -27,8 +28,8 @@ export class TodoItemsController {
   @ApiQuery({ name: 'timeline_phase_id', required: false, type: String })
   @ApiResponse({ status: 200, description: 'Todo items returned' })
   @ApiResponse({ status: 403, description: 'Access denied' })
-  async findAll(@Req() req: any, @Query('tet_config_id') tetConfigId: string, @Query('timeline_phase_id') timelinePhaseId?: string) {
-    return this.todoItemsService.findAllByTetConfig(req.user.userId as string, tetConfigId, timelinePhaseId);
+  async findAll(@Req() req: AuthRequest, @Query('tet_config_id') tetConfigId: string, @Query('timeline_phase_id') timelinePhaseId?: string) {
+    return this.todoItemsService.findAllByTetConfig(req.user.userId, tetConfigId, timelinePhaseId);
   }
 
   @Get(':id')
@@ -36,8 +37,8 @@ export class TodoItemsController {
   @ApiResponse({ status: 200, description: 'Todo item returned' })
   @ApiResponse({ status: 404, description: 'Todo item not found' })
   @ApiResponse({ status: 403, description: 'Access denied' })
-  async findOne(@Req() req: any, @Param('id') id: string) {
-    return this.todoItemsService.findOne(req.user.userId as string, id);
+  async findOne(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.todoItemsService.findOne(req.user.userId, id);
   }
 
   @Patch(':id')
@@ -45,8 +46,8 @@ export class TodoItemsController {
   @ApiResponse({ status: 200, description: 'Todo item updated successfully' })
   @ApiResponse({ status: 404, description: 'Todo item not found' })
   @ApiResponse({ status: 403, description: 'Access denied' })
-  async update(@Req() req: any, @Param('id') id: string, @Body() updateDto: UpdateTodoItemDto) {
-    return this.todoItemsService.update(req.user.userId as string, id, updateDto);
+  async update(@Req() req: AuthRequest, @Param('id') id: string, @Body() updateDto: UpdateTodoItemDto) {
+    return this.todoItemsService.update(req.user.userId, id, updateDto);
   }
 
   @Put(':id/subtasks')
@@ -54,8 +55,8 @@ export class TodoItemsController {
   @ApiResponse({ status: 200, description: 'Subtask upserted' })
   @ApiResponse({ status: 404, description: 'Todo item not found' })
   @ApiResponse({ status: 403, description: 'Access denied' })
-  async upsertSubtask(@Req() req: any, @Param('id') id: string, @Body() dto: UpsertSubtaskDto) {
-    return this.todoItemsService.upsertSubtask(req.user.userId as string, id, dto.name, dto.done ?? false);
+  async upsertSubtask(@Req() req: AuthRequest, @Param('id') id: string, @Body() dto: UpsertSubtaskDto) {
+    return this.todoItemsService.upsertSubtask(req.user.userId, id, dto.name, dto.done ?? false);
   }
 
   @Delete(':id/subtasks')
@@ -63,8 +64,8 @@ export class TodoItemsController {
   @ApiResponse({ status: 200, description: 'Subtask removed' })
   @ApiResponse({ status: 404, description: 'Todo item not found' })
   @ApiResponse({ status: 403, description: 'Access denied' })
-  async removeSubtask(@Req() req: any, @Param('id') id: string, @Body() dto: RemoveSubtaskDto) {
-    return this.todoItemsService.removeSubtask(req.user.userId as string, id, dto.name);
+  async removeSubtask(@Req() req: AuthRequest, @Param('id') id: string, @Body() dto: RemoveSubtaskDto) {
+    return this.todoItemsService.removeSubtask(req.user.userId, id, dto.name);
   }
 
   @Delete(':id')
@@ -72,7 +73,7 @@ export class TodoItemsController {
   @ApiResponse({ status: 200, description: 'Todo item deleted successfully' })
   @ApiResponse({ status: 404, description: 'Todo item not found' })
   @ApiResponse({ status: 403, description: 'Access denied' })
-  async remove(@Req() req: any, @Param('id') id: string) {
-    return this.todoItemsService.remove(req.user.userId as string, id);
+  async remove(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.todoItemsService.remove(req.user.userId, id);
   }
 }

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsDateString, IsEnum, IsInt, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsInt, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, IsUUID, ValidateIf } from 'class-validator';
 import { TodoPriority, TodoStatus } from '../../helper/enums';
 
 export class CreateTodoItemDto {
@@ -35,9 +35,10 @@ export class CreateTodoItemDto {
   })
   is_shopping?: boolean;
 
-  @ApiProperty({ type: Number, description: 'Estimated price', nullable: true })
+  @ApiProperty({ type: Number, description: 'Estimated price. Required when is_shopping = true.', nullable: true })
+  @ValidateIf((o) => o.is_shopping === true)
+  @IsNotEmpty()
   @IsNumber()
-  @IsOptional()
   estimated_price?: number;
 
   @ApiProperty({ type: Number, description: 'Quantity', nullable: true })
@@ -70,8 +71,9 @@ export class CreateTodoItemDto {
   @IsNotEmpty()
   timeline_phase_id!: string;
 
-  @ApiProperty({ type: String, description: 'Category ID' })
-  @IsUUID('4')
+  @ApiProperty({ type: String, description: 'Category ID. Required when is_shopping = true.', nullable: true })
+  @ValidateIf((o) => o.is_shopping === true)
   @IsNotEmpty()
-  category_id!: string;
+  @IsUUID('4')
+  category_id?: string;
 }

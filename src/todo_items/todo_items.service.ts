@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TodoItem } from './entities/todo_item.entity';
@@ -30,11 +30,16 @@ export class TodoItemsService {
 
   async create(userId: string, createDto: CreateTodoItemDto) {
     await this.collaboratorsService.checkAccess(userId, createDto.tet_config_id);
+
+    if (createDto.is_shopping && (!createDto.category_id || createDto.estimated_price == null)) {
+      throw new BadRequestException('Shopping items require a category and an estimated price');
+    }
+
     const item = this.todoItemRepository.create({
       ...createDto,
       tet_config: { id: createDto.tet_config_id },
       timeline_phase: { id: createDto.timeline_phase_id },
-      category: { id: createDto.category_id },
+      ...(createDto.category_id && { category: { id: createDto.category_id } }),
       ...(createDto.assigned_to && { assigned_to_user: { id: createDto.assigned_to } }),
     });
     return this.todoItemRepository.save(item);
@@ -75,6 +80,11 @@ export class TodoItemsService {
 
     const isNowCompleted = item.status === TodoStatus.COMPLETED;
     const hasCost = item.estimated_price != null;
+
+    const categoryId = updateDto.category_id ?? item.category?.id;
+    if (item.is_shopping && (!categoryId || item.estimated_price == null)) {
+      throw new BadRequestException('Shopping items require a category and an estimated price');
+    }
 
     if (!wasCompleted && isNowCompleted && hasCost) {
       item.purchased = true;
