@@ -17,7 +17,14 @@ export declare class CollaboratorsService {
         message: string;
     }>;
     getMyInvitations(userId: string): Promise<Collaborator[]>;
-    findAllByTetConfig(userId: string, tetConfigId: string): Promise<Collaborator[]>;
+    findAllByTetConfig(userId: string, tetConfigId: string): Promise<{
+        owner: {
+            id: string;
+            name: string;
+            email: string;
+        };
+        collaborators: Collaborator[];
+    }>;
     updateRole(id: string, ownerId: string, role: CollaboratorRole): Promise<Collaborator>;
     remove(id: string, ownerId: string): Promise<{
         message: string;

@@ -7,7 +7,14 @@ export declare class CollaboratorsController {
     constructor(collaboratorsService: CollaboratorsService);
     add(req: AuthRequest, createDto: CreateCollaboratorDto): Promise<import("./entities/collaborator.entity").Collaborator>;
     getMyInvitations(req: AuthRequest): Promise<import("./entities/collaborator.entity").Collaborator[]>;
-    findAll(req: AuthRequest, tetConfigId: string): Promise<import("./entities/collaborator.entity").Collaborator[]>;
+    findAll(req: AuthRequest, tetConfigId: string): Promise<{
+        owner: {
+            id: string;
+            name: string;
+            email: string;
+        };
+        collaborators: import("./entities/collaborator.entity").Collaborator[];
+    }>;
     accept(id: string, req: AuthRequest): Promise<import("./entities/collaborator.entity").Collaborator>;
     decline(id: string, req: AuthRequest): Promise<{
         message: string;

@@ -109,10 +109,11 @@ let CollaboratorsService = class CollaboratorsService {
     }
     async findAllByTetConfig(userId, tetConfigId) {
         await this.checkAccess(userId, tetConfigId);
-        return this.collaboratorRepository.find({
-            where: { tet_config: { id: tetConfigId } },
-            relations: ['user'],
-        });
+        const [tetConfig, collaborators] = await Promise.all([this.tetConfigRepository.findOne({ where: { id: tetConfigId }, relations: ['owner'] }), this.collaboratorRepository.find({ where: { tet_config: { id: tetConfigId } }, relations: ['user'] })]);
+        return {
+            owner: { id: tetConfig.owner.id, name: tetConfig.owner.name, email: tetConfig.owner.email },
+            collaborators,
+        };
     }
     async updateRole(id, ownerId, role) {
         const collab = await this.collaboratorRepository.findOne({
