@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateTetConfigDto {
   @ApiProperty({ type: Number, description: 'Year of Tet celebration' })
@@ -16,4 +16,9 @@ export class CreateTetConfigDto {
   @IsNumber()
   @IsNotEmpty()
   total_budget!: number;
+
+  @ApiPropertyOptional({ type: String, description: 'Currency code (e.g. VND, USD)', default: 'VND' })
+  @IsString()
+  @IsOptional()
+  currency?: string;
 }

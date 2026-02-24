@@ -18,12 +18,18 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const category_entity_1 = require("./entities/category.entity");
 const tet_config_entity_1 = require("../tet_configs/entities/tet_config.entity");
+const budget_transaction_entity_1 = require("../budget_transactions/entities/budget_transaction.entity");
+const collaborators_service_1 = require("../collaborators/collaborators.service");
 let CategoriesService = class CategoriesService {
     categoryRepository;
     tetConfigRepository;
-    constructor(categoryRepository, tetConfigRepository) {
+    transactionRepository;
+    collaboratorsService;
+    constructor(categoryRepository, tetConfigRepository, transactionRepository, collaboratorsService) {
         this.categoryRepository = categoryRepository;
         this.tetConfigRepository = tetConfigRepository;
+        this.transactionRepository = transactionRepository;
+        this.collaboratorsService = collaboratorsService;
     }
     async getAllocatedSum(tetConfigId, excludeCategoryId) {
         const categories = await this.categoryRepository.find({ where: { tet_config: { id: tetConfigId } } });
@@ -84,13 +90,34 @@ let CategoriesService = class CategoriesService {
         await this.categoryRepository.softRemove(category);
         return { message: 'Category deleted successfully' };
     }
+    async findTransactions(userId, categoryId, from, to, page = 1, limit = 20) {
+        const category = await this.categoryRepository.findOne({ where: { id: categoryId }, relations: ['tet_config'] });
+        if (!category)
+            throw new common_1.NotFoundException('Category not found');
+        await this.collaboratorsService.checkAccess(userId, category.tet_config.id);
+        const query = this.transactionRepository
+            .createQueryBuilder('tx')
+            .where('tx.category_id = :categoryId', { categoryId })
+            .orderBy('tx.transaction_date', 'DESC')
+            .skip((page - 1) * limit)
+            .take(limit);
+        if (from)
+            query.andWhere('tx.transaction_date >= :from', { from: new Date(from) });
+        if (to)
+            query.andWhere('tx.transaction_date <= :to', { to: new Date(to) });
+        const [data, total] = await query.getManyAndCount();
+        return { data, total, page, limit };
+    }
 };
 exports.CategoriesService = CategoriesService;
 exports.CategoriesService = CategoriesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(category_entity_1.Category)),
     __param(1, (0, typeorm_1.InjectRepository)(tet_config_entity_1.TetConfig)),
+    __param(2, (0, typeorm_1.InjectRepository)(budget_transaction_entity_1.BudgetTransaction)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        collaborators_service_1.CollaboratorsService])
 ], CategoriesService);
 //# sourceMappingURL=categories.service.js.map

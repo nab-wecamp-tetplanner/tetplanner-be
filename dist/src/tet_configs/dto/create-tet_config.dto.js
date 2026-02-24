@@ -16,6 +16,7 @@ class CreateTetConfigDto {
     year;
     name;
     total_budget;
+    currency;
 }
 exports.CreateTetConfigDto = CreateTetConfigDto;
 __decorate([
@@ -36,4 +37,10 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Number)
 ], CreateTetConfigDto.prototype, "total_budget", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: String, description: 'Currency code (e.g. VND, USD)', default: 'VND' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateTetConfigDto.prototype, "currency", void 0);
 //# sourceMappingURL=create-tet_config.dto.js.map

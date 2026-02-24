@@ -6,23 +6,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CategoriesModule = void 0;
+exports.DashboardModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const categories_service_1 = require("./categories.service");
-const categories_controller_1 = require("./categories.controller");
-const category_entity_1 = require("./entities/category.entity");
+const dashboard_service_1 = require("./dashboard.service");
+const dashboard_controller_1 = require("./dashboard.controller");
 const tet_config_entity_1 = require("../tet_configs/entities/tet_config.entity");
+const todo_item_entity_1 = require("../todo_items/entities/todo_item.entity");
 const budget_transaction_entity_1 = require("../budget_transactions/entities/budget_transaction.entity");
+const category_entity_1 = require("../categories/entities/category.entity");
 const collaborators_module_1 = require("../collaborators/collaborators.module");
-let CategoriesModule = class CategoriesModule {
+const budget_calculations_service_1 = require("../helper/budget-calculations.service");
+let DashboardModule = class DashboardModule {
 };
-exports.CategoriesModule = CategoriesModule;
-exports.CategoriesModule = CategoriesModule = __decorate([
+exports.DashboardModule = DashboardModule;
+exports.DashboardModule = DashboardModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([category_entity_1.Category, tet_config_entity_1.TetConfig, budget_transaction_entity_1.BudgetTransaction]), collaborators_module_1.CollaboratorsModule],
-        controllers: [categories_controller_1.CategoriesController],
-        providers: [categories_service_1.CategoriesService],
+        imports: [typeorm_1.TypeOrmModule.forFeature([tet_config_entity_1.TetConfig, todo_item_entity_1.TodoItem, budget_transaction_entity_1.BudgetTransaction, category_entity_1.Category]), collaborators_module_1.CollaboratorsModule],
+        controllers: [dashboard_controller_1.DashboardController],
+        providers: [dashboard_service_1.DashboardService, budget_calculations_service_1.BudgetCalculationsService],
     })
-], CategoriesModule);
-//# sourceMappingURL=categories.module.js.map
+], DashboardModule);
+//# sourceMappingURL=dashboard.module.js.map

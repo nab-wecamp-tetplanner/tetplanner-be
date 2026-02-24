@@ -9,6 +9,7 @@ export declare class TetConfig {
     year: number;
     name: string;
     total_budget: number;
+    currency: string;
     created_at: Date;
     deleted_at: Date;
     owner: User;

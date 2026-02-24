@@ -20,6 +20,9 @@ export class TetConfig {
   @Column('decimal', { precision: 15, scale: 2 })
   total_budget: number;
 
+  @Column({ nullable: true, default: 'VND' })
+  currency: string;
+
   @CreateDateColumn()
   created_at: Date;
 

@@ -22,6 +22,7 @@ let TetConfig = class TetConfig {
     year;
     name;
     total_budget;
+    currency;
     created_at;
     deleted_at;
     owner;
@@ -48,6 +49,10 @@ __decorate([
     (0, typeorm_1.Column)('decimal', { precision: 15, scale: 2 }),
     __metadata("design:type", Number)
 ], TetConfig.prototype, "total_budget", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true, default: 'VND' }),
+    __metadata("design:type", String)
+], TetConfig.prototype, "currency", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

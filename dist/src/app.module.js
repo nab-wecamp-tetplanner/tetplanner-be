@@ -56,6 +56,7 @@ const budget_transactions_module_1 = require("./budget_transactions/budget_trans
 const collaborators_module_1 = require("./collaborators/collaborators.module");
 const notifications_module_1 = require("./notifications/notifications.module");
 const tasks_module_1 = require("./tasks/tasks.module");
+const dashboard_module_1 = require("./dashboard/dashboard.module");
 const config_1 = require("@nestjs/config");
 const joi = __importStar(require("joi"));
 const configuration_1 = __importDefault(require("./config/configuration"));
@@ -92,6 +93,7 @@ exports.AppModule = AppModule = __decorate([
             budget_transactions_module_1.BudgetTransactionsModule,
             collaborators_module_1.CollaboratorsModule,
             notifications_module_1.NotificationsModule,
+            dashboard_module_1.DashboardModule,
             auth_module_1.AuthModule,
             supabase_storage_module_1.SupabaseStorageModule,
         ],

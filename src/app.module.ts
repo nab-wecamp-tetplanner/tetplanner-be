@@ -11,6 +11,7 @@ import { BudgetTransactionsModule } from './budget_transactions/budget_transacti
 import { CollaboratorsModule } from './collaborators/collaborators.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { TasksModule } from './tasks/tasks.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { ConfigModule } from '@nestjs/config';
 import * as joi from 'joi';
 import configuration from './config/configuration';
@@ -45,6 +46,7 @@ import { SupabaseStorageModule } from './supabase-storage/supabase-storage.modul
     BudgetTransactionsModule,
     CollaboratorsModule,
     NotificationsModule,
+    DashboardModule,
     AuthModule,
     SupabaseStorageModule,
   ],

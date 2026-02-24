@@ -10,15 +10,19 @@ exports.TasksModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const tasks_service_1 = require("./tasks.service");
+const tasks_query_service_1 = require("./tasks-query.service");
+const tasks_controller_1 = require("./tasks.controller");
 const todo_item_entity_1 = require("../todo_items/entities/todo_item.entity");
 const notifications_module_1 = require("../notifications/notifications.module");
+const collaborators_module_1 = require("../collaborators/collaborators.module");
 let TasksModule = class TasksModule {
 };
 exports.TasksModule = TasksModule;
 exports.TasksModule = TasksModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([todo_item_entity_1.TodoItem]), notifications_module_1.NotificationsModule],
-        providers: [tasks_service_1.TasksService],
+        imports: [typeorm_1.TypeOrmModule.forFeature([todo_item_entity_1.TodoItem]), notifications_module_1.NotificationsModule, collaborators_module_1.CollaboratorsModule],
+        controllers: [tasks_controller_1.TasksController],
+        providers: [tasks_service_1.TasksService, tasks_query_service_1.TasksQueryService],
     })
 ], TasksModule);
 //# sourceMappingURL=tasks.module.js.map

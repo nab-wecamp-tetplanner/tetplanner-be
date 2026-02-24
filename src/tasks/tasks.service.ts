@@ -34,7 +34,6 @@ export class TasksService {
       if (!userId) continue;
 
       await this.todoItemRepository.update(item.id, { is_overdue: true });
-      // eslint-disable-next-line prettier/prettier
       await this.notificationsService.createForTodoItem(userId, item.id, `"${item.title}" is overdue!`);
     }
 
