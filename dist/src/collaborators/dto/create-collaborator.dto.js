@@ -16,7 +16,7 @@ const enums_1 = require("../../helper/enums");
 class CreateCollaboratorDto {
     role;
     tet_config_id;
-    user_id;
+    user_email;
 }
 exports.CreateCollaboratorDto = CreateCollaboratorDto;
 __decorate([
@@ -32,9 +32,8 @@ __decorate([
     __metadata("design:type", String)
 ], CreateCollaboratorDto.prototype, "tet_config_id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: String, description: 'User ID' }),
-    (0, class_validator_1.IsUUID)('4'),
+    (0, swagger_1.ApiProperty)({ type: String, description: 'User email' }),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], CreateCollaboratorDto.prototype, "user_id", void 0);
+], CreateCollaboratorDto.prototype, "user_email", void 0);
 //# sourceMappingURL=create-collaborator.dto.js.map

@@ -13,8 +13,7 @@ export class CreateCollaboratorDto {
   @IsNotEmpty()
   tet_config_id!: string;
 
-  @ApiProperty({ type: String, description: 'User ID' })
-  @IsUUID('4')
+  @ApiProperty({ type: String, description: 'User email' })
   @IsNotEmpty()
-  user_id!: string;
+  user_email!: string;
 }

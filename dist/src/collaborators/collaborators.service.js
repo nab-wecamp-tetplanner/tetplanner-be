@@ -57,7 +57,7 @@ let CollaboratorsService = class CollaboratorsService {
     async add(ownerId, createDto) {
         await this.checkOwner(ownerId, createDto.tet_config_id);
         const existing = await this.collaboratorRepository.findOne({
-            where: { tet_config: { id: createDto.tet_config_id }, user: { id: createDto.user_id } },
+            where: { tet_config: { id: createDto.tet_config_id }, user: { email: createDto.user_email } },
         });
         if (existing)
             throw new common_1.ConflictException('User is already a collaborator');
@@ -65,11 +65,11 @@ let CollaboratorsService = class CollaboratorsService {
             role: createDto.role,
             status: enums_1.CollaboratorStatus.PENDING,
             tet_config: { id: createDto.tet_config_id },
-            user: { id: createDto.user_id },
+            user: { email: createDto.user_email },
         });
         const saved = await this.collaboratorRepository.save(collaborator);
         const tetConfig = await this.tetConfigRepository.findOne({ where: { id: createDto.tet_config_id } });
-        await this.notificationsService.createForUser(createDto.user_id, `You've been invited to collaborate on "${tetConfig.name}"`);
+        await this.notificationsService.createForUser(createDto.user_email, `You've been invited to collaborate on "${tetConfig.name}"`);
         return saved;
     }
     async accept(id, userId) {
