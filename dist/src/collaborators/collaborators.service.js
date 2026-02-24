@@ -18,12 +18,16 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const collaborator_entity_1 = require("./entities/collaborator.entity");
 const tet_config_entity_1 = require("../tet_configs/entities/tet_config.entity");
+const enums_1 = require("../helper/enums");
+const notifications_service_1 = require("../notifications/notifications.service");
 let CollaboratorsService = class CollaboratorsService {
     collaboratorRepository;
     tetConfigRepository;
-    constructor(collaboratorRepository, tetConfigRepository) {
+    notificationsService;
+    constructor(collaboratorRepository, tetConfigRepository, notificationsService) {
         this.collaboratorRepository = collaboratorRepository;
         this.tetConfigRepository = tetConfigRepository;
+        this.notificationsService = notificationsService;
     }
     async checkAccess(userId, tetConfigId) {
         const tetConfig = await this.tetConfigRepository.findOne({
@@ -35,7 +39,7 @@ let CollaboratorsService = class CollaboratorsService {
         if (tetConfig.owner.id === userId)
             return;
         const collab = await this.collaboratorRepository.findOne({
-            where: { tet_config: { id: tetConfigId }, user: { id: userId } },
+            where: { tet_config: { id: tetConfigId }, user: { id: userId }, status: enums_1.CollaboratorStatus.ACCEPTED },
         });
         if (!collab)
             throw new common_1.ForbiddenException('Access denied');
@@ -59,10 +63,49 @@ let CollaboratorsService = class CollaboratorsService {
             throw new common_1.ConflictException('User is already a collaborator');
         const collaborator = this.collaboratorRepository.create({
             role: createDto.role,
+            status: enums_1.CollaboratorStatus.PENDING,
             tet_config: { id: createDto.tet_config_id },
             user: { id: createDto.user_id },
         });
-        return this.collaboratorRepository.save(collaborator);
+        const saved = await this.collaboratorRepository.save(collaborator);
+        const tetConfig = await this.tetConfigRepository.findOne({ where: { id: createDto.tet_config_id } });
+        await this.notificationsService.createForUser(createDto.user_id, `You've been invited to collaborate on "${tetConfig.name}"`);
+        return saved;
+    }
+    async accept(id, userId) {
+        const collab = await this.collaboratorRepository.findOne({
+            where: { id },
+            relations: ['user', 'tet_config'],
+        });
+        if (!collab)
+            throw new common_1.NotFoundException('Invitation not found');
+        if (collab.user.id !== userId)
+            throw new common_1.ForbiddenException('This invitation is not for you');
+        if (collab.status !== enums_1.CollaboratorStatus.PENDING)
+            throw new common_1.ConflictException('Invitation is no longer pending');
+        collab.status = enums_1.CollaboratorStatus.ACCEPTED;
+        collab.accepted_at = new Date();
+        return this.collaboratorRepository.save(collab);
+    }
+    async decline(id, userId) {
+        const collab = await this.collaboratorRepository.findOne({
+            where: { id },
+            relations: ['user'],
+        });
+        if (!collab)
+            throw new common_1.NotFoundException('Invitation not found');
+        if (collab.user.id !== userId)
+            throw new common_1.ForbiddenException('This invitation is not for you');
+        if (collab.status !== enums_1.CollaboratorStatus.PENDING)
+            throw new common_1.ConflictException('Invitation is no longer pending');
+        await this.collaboratorRepository.remove(collab);
+        return { message: 'Invitation declined' };
+    }
+    async getMyInvitations(userId) {
+        return this.collaboratorRepository.find({
+            where: { user: { id: userId }, status: enums_1.CollaboratorStatus.PENDING },
+            relations: ['tet_config', 'tet_config.owner'],
+        });
     }
     async findAllByTetConfig(userId, tetConfigId) {
         await this.checkAccess(userId, tetConfigId);
@@ -102,6 +145,7 @@ exports.CollaboratorsService = CollaboratorsService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(collaborator_entity_1.Collaborator)),
     __param(1, (0, typeorm_1.InjectRepository)(tet_config_entity_1.TetConfig)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        notifications_service_1.NotificationsService])
 ], CollaboratorsService);
 //# sourceMappingURL=collaborators.service.js.map

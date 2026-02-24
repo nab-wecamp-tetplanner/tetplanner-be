@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { CollaboratorRole } from '../../helper/enums';
+import { CollaboratorRole, CollaboratorStatus } from '../../helper/enums';
 import { TetConfig } from '../../tet_configs/entities/tet_config.entity';
 import { User } from '../../users/entities/user.entity';
 
@@ -10,6 +10,9 @@ export class Collaborator {
 
   @Column({ type: 'enum', enum: CollaboratorRole })
   role: CollaboratorRole;
+
+  @Column({ type: 'enum', enum: CollaboratorStatus, default: CollaboratorStatus.PENDING })
+  status: CollaboratorStatus;
 
   @Column('timestamp', { nullable: true })
   accepted_at: Date;

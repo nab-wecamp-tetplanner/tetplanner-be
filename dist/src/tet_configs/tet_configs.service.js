@@ -18,7 +18,9 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const tet_config_entity_1 = require("./entities/tet_config.entity");
 const category_entity_1 = require("../categories/entities/category.entity");
+const collaborator_entity_1 = require("../collaborators/entities/collaborator.entity");
 const budget_calculations_service_1 = require("../helper/budget-calculations.service");
+const enums_1 = require("../helper/enums");
 function warningLevel(percentage) {
     if (percentage >= 100)
         return 'critical';
@@ -29,10 +31,12 @@ function warningLevel(percentage) {
 let TetConfigsService = class TetConfigsService {
     tetConfigRepository;
     categoryRepository;
+    collaboratorRepository;
     budgetCalculationsService;
-    constructor(tetConfigRepository, categoryRepository, budgetCalculationsService) {
+    constructor(tetConfigRepository, categoryRepository, collaboratorRepository, budgetCalculationsService) {
         this.tetConfigRepository = tetConfigRepository;
         this.categoryRepository = categoryRepository;
+        this.collaboratorRepository = collaboratorRepository;
         this.budgetCalculationsService = budgetCalculationsService;
     }
     async create(userId, createTetConfigDto) {
@@ -43,9 +47,10 @@ let TetConfigsService = class TetConfigsService {
         return this.tetConfigRepository.save(tetConfig);
     }
     async findAllByUser(userId) {
-        return this.tetConfigRepository.find({
-            where: { owner: { id: userId } },
-        });
+        const [owned, collabs] = await Promise.all([this.tetConfigRepository.find({ where: { owner: { id: userId } } }), this.collaboratorRepository.find({ where: { user: { id: userId }, status: enums_1.CollaboratorStatus.ACCEPTED }, relations: ['tet_config'] })]);
+        const collaboratedConfigs = collabs.map((c) => c.tet_config);
+        const seen = new Set(owned.map((tc) => tc.id));
+        return [...owned, ...collaboratedConfigs.filter((tc) => !seen.has(tc.id))];
     }
     async findOne(id) {
         const tetConfig = await this.tetConfigRepository.findOne({
@@ -133,7 +138,9 @@ exports.TetConfigsService = TetConfigsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(tet_config_entity_1.TetConfig)),
     __param(1, (0, typeorm_1.InjectRepository)(category_entity_1.Category)),
+    __param(2, (0, typeorm_1.InjectRepository)(collaborator_entity_1.Collaborator)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         budget_calculations_service_1.BudgetCalculationsService])
 ], TetConfigsService);

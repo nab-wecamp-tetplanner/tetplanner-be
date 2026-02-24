@@ -17,6 +17,7 @@ const user_entity_1 = require("../../users/entities/user.entity");
 let Collaborator = class Collaborator {
     id;
     role;
+    status;
     accepted_at;
     tet_config;
     user;
@@ -30,6 +31,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'enum', enum: enums_1.CollaboratorRole }),
     __metadata("design:type", String)
 ], Collaborator.prototype, "role", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'enum', enum: enums_1.CollaboratorStatus, default: enums_1.CollaboratorStatus.PENDING }),
+    __metadata("design:type", String)
+], Collaborator.prototype, "status", void 0);
 __decorate([
     (0, typeorm_1.Column)('timestamp', { nullable: true }),
     __metadata("design:type", Date)

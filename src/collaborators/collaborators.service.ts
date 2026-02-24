@@ -4,7 +4,8 @@ import { Repository } from 'typeorm';
 import { Collaborator } from './entities/collaborator.entity';
 import { TetConfig } from '../tet_configs/entities/tet_config.entity';
 import { CreateCollaboratorDto } from './dto/create-collaborator.dto';
-import { CollaboratorRole } from '../helper/enums';
+import { CollaboratorRole, CollaboratorStatus } from '../helper/enums';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class CollaboratorsService {
@@ -13,6 +14,7 @@ export class CollaboratorsService {
     private readonly collaboratorRepository: Repository<Collaborator>,
     @InjectRepository(TetConfig)
     private readonly tetConfigRepository: Repository<TetConfig>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async checkAccess(userId: string, tetConfigId: string): Promise<void> {
@@ -24,7 +26,7 @@ export class CollaboratorsService {
     if (tetConfig.owner.id === userId) return;
 
     const collab = await this.collaboratorRepository.findOne({
-      where: { tet_config: { id: tetConfigId }, user: { id: userId } },
+      where: { tet_config: { id: tetConfigId }, user: { id: userId }, status: CollaboratorStatus.ACCEPTED },
     });
     if (!collab) throw new ForbiddenException('Access denied');
   }
@@ -40,16 +42,58 @@ export class CollaboratorsService {
 
   async add(ownerId: string, createDto: CreateCollaboratorDto) {
     await this.checkOwner(ownerId, createDto.tet_config_id);
+
     const existing = await this.collaboratorRepository.findOne({
       where: { tet_config: { id: createDto.tet_config_id }, user: { id: createDto.user_id } },
     });
     if (existing) throw new ConflictException('User is already a collaborator');
+
     const collaborator = this.collaboratorRepository.create({
       role: createDto.role,
+      status: CollaboratorStatus.PENDING,
       tet_config: { id: createDto.tet_config_id },
       user: { id: createDto.user_id },
     });
-    return this.collaboratorRepository.save(collaborator);
+    const saved = await this.collaboratorRepository.save(collaborator);
+
+    const tetConfig = await this.tetConfigRepository.findOne({ where: { id: createDto.tet_config_id } });
+    await this.notificationsService.createForUser(createDto.user_id, `You've been invited to collaborate on "${tetConfig!.name}"`);
+
+    return saved;
+  }
+
+  async accept(id: string, userId: string) {
+    const collab = await this.collaboratorRepository.findOne({
+      where: { id },
+      relations: ['user', 'tet_config'],
+    });
+    if (!collab) throw new NotFoundException('Invitation not found');
+    if (collab.user.id !== userId) throw new ForbiddenException('This invitation is not for you');
+    if (collab.status !== CollaboratorStatus.PENDING) throw new ConflictException('Invitation is no longer pending');
+
+    collab.status = CollaboratorStatus.ACCEPTED;
+    collab.accepted_at = new Date();
+    return this.collaboratorRepository.save(collab);
+  }
+
+  async decline(id: string, userId: string) {
+    const collab = await this.collaboratorRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+    if (!collab) throw new NotFoundException('Invitation not found');
+    if (collab.user.id !== userId) throw new ForbiddenException('This invitation is not for you');
+    if (collab.status !== CollaboratorStatus.PENDING) throw new ConflictException('Invitation is no longer pending');
+
+    await this.collaboratorRepository.remove(collab);
+    return { message: 'Invitation declined' };
+  }
+
+  async getMyInvitations(userId: string) {
+    return this.collaboratorRepository.find({
+      where: { user: { id: userId }, status: CollaboratorStatus.PENDING },
+      relations: ['tet_config', 'tet_config.owner'],
+    });
   }
 
   async findAllByTetConfig(userId: string, tetConfigId: string) {
@@ -74,7 +118,7 @@ export class CollaboratorsService {
   async remove(id: string, ownerId: string) {
     const collab = await this.collaboratorRepository.findOne({
       where: { id },
-      relations: ['tet_config', 'tet_config.owner'], // get owner id for permission check
+      relations: ['tet_config', 'tet_config.owner'],
     });
     if (!collab) throw new NotFoundException('Collaborator not found');
     if (collab.tet_config.owner.id !== ownerId) throw new ForbiddenException('Only the owner can remove collaborators');

@@ -3,9 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TetConfig } from './entities/tet_config.entity';
 import { Category } from '../categories/entities/category.entity';
+import { Collaborator } from '../collaborators/entities/collaborator.entity';
 import { CreateTetConfigDto } from './dto/create-tet_config.dto';
 import { UpdateTetConfigDto } from './dto/update-tet_config.dto';
 import { BudgetCalculationsService } from '../helper/budget-calculations.service';
+import { CollaboratorStatus } from '../helper/enums';
 
 function warningLevel(percentage: number): 'ok' | 'warning' | 'critical' {
   if (percentage >= 100) return 'critical';
@@ -20,6 +22,8 @@ export class TetConfigsService {
     private readonly tetConfigRepository: Repository<TetConfig>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Collaborator)
+    private readonly collaboratorRepository: Repository<Collaborator>,
     private readonly budgetCalculationsService: BudgetCalculationsService,
   ) {}
 
@@ -32,9 +36,10 @@ export class TetConfigsService {
   }
 
   async findAllByUser(userId: string) {
-    return this.tetConfigRepository.find({
-      where: { owner: { id: userId } },
-    });
+    const [owned, collabs] = await Promise.all([this.tetConfigRepository.find({ where: { owner: { id: userId } } }), this.collaboratorRepository.find({ where: { user: { id: userId }, status: CollaboratorStatus.ACCEPTED }, relations: ['tet_config'] })]);
+    const collaboratedConfigs = collabs.map((c) => c.tet_config);
+    const seen = new Set(owned.map((tc) => tc.id));
+    return [...owned, ...collaboratedConfigs.filter((tc) => !seen.has(tc.id))];
   }
 
   async findOne(id: string) {

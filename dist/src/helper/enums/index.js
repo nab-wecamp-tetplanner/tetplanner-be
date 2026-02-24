@@ -18,4 +18,5 @@ __exportStar(require("./todo-priority.enum"), exports);
 __exportStar(require("./todo-status.enum"), exports);
 __exportStar(require("./transaction-type.enum"), exports);
 __exportStar(require("./collaborator-role.enum"), exports);
+__exportStar(require("./collaborator-status.enum"), exports);
 //# sourceMappingURL=index.js.map

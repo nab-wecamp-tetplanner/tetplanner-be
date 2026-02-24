@@ -1,14 +1,16 @@
 import { Repository } from 'typeorm';
 import { TetConfig } from './entities/tet_config.entity';
 import { Category } from '../categories/entities/category.entity';
+import { Collaborator } from '../collaborators/entities/collaborator.entity';
 import { CreateTetConfigDto } from './dto/create-tet_config.dto';
 import { UpdateTetConfigDto } from './dto/update-tet_config.dto';
 import { BudgetCalculationsService } from '../helper/budget-calculations.service';
 export declare class TetConfigsService {
     private readonly tetConfigRepository;
     private readonly categoryRepository;
+    private readonly collaboratorRepository;
     private readonly budgetCalculationsService;
-    constructor(tetConfigRepository: Repository<TetConfig>, categoryRepository: Repository<Category>, budgetCalculationsService: BudgetCalculationsService);
+    constructor(tetConfigRepository: Repository<TetConfig>, categoryRepository: Repository<Category>, collaboratorRepository: Repository<Collaborator>, budgetCalculationsService: BudgetCalculationsService);
     create(userId: string, createTetConfigDto: CreateTetConfigDto): Promise<TetConfig>;
     findAllByUser(userId: string): Promise<TetConfig[]>;
     findOne(id: string): Promise<TetConfig>;

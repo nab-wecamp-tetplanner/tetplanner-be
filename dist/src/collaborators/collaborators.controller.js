@@ -27,8 +27,17 @@ let CollaboratorsController = class CollaboratorsController {
     async add(req, createDto) {
         return this.collaboratorsService.add(req.user.userId, createDto);
     }
+    async getMyInvitations(req) {
+        return this.collaboratorsService.getMyInvitations(req.user.userId);
+    }
     async findAll(req, tetConfigId) {
         return this.collaboratorsService.findAllByTetConfig(req.user.userId, tetConfigId);
+    }
+    async accept(id, req) {
+        return this.collaboratorsService.accept(id, req.user.userId);
+    }
+    async decline(id, req) {
+        return this.collaboratorsService.decline(id, req.user.userId);
     }
     async updateRole(id, req, updateDto) {
         return this.collaboratorsService.updateRole(id, req.user.userId, updateDto.role);
@@ -41,7 +50,7 @@ exports.CollaboratorsController = CollaboratorsController;
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Add a collaborator to a tet config (owner only)' }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Collaborator added' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Collaborator added, invitation sent' }),
     (0, swagger_1.ApiResponse)({ status: 403, description: 'Only owner can add collaborators' }),
     (0, swagger_1.ApiResponse)({ status: 409, description: 'User is already a collaborator' }),
     __param(0, (0, common_1.Req)()),
@@ -50,6 +59,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, create_collaborator_dto_1.CreateCollaboratorDto]),
     __metadata("design:returntype", Promise)
 ], CollaboratorsController.prototype, "add", null);
+__decorate([
+    (0, common_1.Get)('my-invitations'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get my pending collaboration invitations' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Pending invitations returned' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CollaboratorsController.prototype, "getMyInvitations", null);
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'List collaborators of a tet config' }),
@@ -62,6 +80,32 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], CollaboratorsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Patch)(':id/accept'),
+    (0, swagger_1.ApiOperation)({ summary: 'Accept a collaboration invitation' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Invitation accepted' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Invitation is not for you' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Invitation not found' }),
+    (0, swagger_1.ApiResponse)({ status: 409, description: 'Invitation is no longer pending' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], CollaboratorsController.prototype, "accept", null);
+__decorate([
+    (0, common_1.Patch)(':id/decline'),
+    (0, swagger_1.ApiOperation)({ summary: 'Decline a collaboration invitation' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Invitation declined' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Invitation is not for you' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Invitation not found' }),
+    (0, swagger_1.ApiResponse)({ status: 409, description: 'Invitation is no longer pending' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], CollaboratorsController.prototype, "decline", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update collaborator role (owner only)' }),
