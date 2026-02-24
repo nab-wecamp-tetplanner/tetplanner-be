@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Collaborator } from './entities/collaborator.entity';
 import { TetConfig } from '../tet_configs/entities/tet_config.entity';
+import { User } from '../users/entities/user.entity';
 import { CreateCollaboratorDto } from './dto/create-collaborator.dto';
 import { CollaboratorRole, CollaboratorStatus } from '../helper/enums';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -14,6 +15,8 @@ export class CollaboratorsService {
     private readonly collaboratorRepository: Repository<Collaborator>,
     @InjectRepository(TetConfig)
     private readonly tetConfigRepository: Repository<TetConfig>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -42,9 +45,12 @@ export class CollaboratorsService {
 
   async add(ownerId: string, createDto: CreateCollaboratorDto) {
     await this.checkOwner(ownerId, createDto.tet_config_id);
+    // user repository to get userId
+    const invitedUser = await this.userRepository.findOne({ where: { email: createDto.user_email } });
+    if (!invitedUser) throw new NotFoundException('User with that email not found');
 
     const existing = await this.collaboratorRepository.findOne({
-      where: { tet_config: { id: createDto.tet_config_id }, user: { email: createDto.user_email } },
+      where: { tet_config: { id: createDto.tet_config_id }, user: { id: invitedUser.id } },
     });
     if (existing) throw new ConflictException('User is already a collaborator');
 
@@ -52,12 +58,12 @@ export class CollaboratorsService {
       role: createDto.role,
       status: CollaboratorStatus.PENDING,
       tet_config: { id: createDto.tet_config_id },
-      user: { email: createDto.user_email },
+      user: { id: invitedUser.id },
     });
     const saved = await this.collaboratorRepository.save(collaborator);
 
     const tetConfig = await this.tetConfigRepository.findOne({ where: { id: createDto.tet_config_id } });
-    await this.notificationsService.createForUser(createDto.user_email, `You've been invited to collaborate on "${tetConfig!.name}"`);
+    await this.notificationsService.createForUser(invitedUser.id, `You've been invited to collaborate on "${tetConfig!.name}"`);
 
     return saved;
   }

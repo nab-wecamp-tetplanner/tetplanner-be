@@ -13,13 +13,14 @@ const collaborators_service_1 = require("./collaborators.service");
 const collaborators_controller_1 = require("./collaborators.controller");
 const collaborator_entity_1 = require("./entities/collaborator.entity");
 const tet_config_entity_1 = require("../tet_configs/entities/tet_config.entity");
+const user_entity_1 = require("../users/entities/user.entity");
 const notifications_module_1 = require("../notifications/notifications.module");
 let CollaboratorsModule = class CollaboratorsModule {
 };
 exports.CollaboratorsModule = CollaboratorsModule;
 exports.CollaboratorsModule = CollaboratorsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([collaborator_entity_1.Collaborator, tet_config_entity_1.TetConfig]), notifications_module_1.NotificationsModule],
+        imports: [typeorm_1.TypeOrmModule.forFeature([collaborator_entity_1.Collaborator, tet_config_entity_1.TetConfig, user_entity_1.User]), notifications_module_1.NotificationsModule],
         controllers: [collaborators_controller_1.CollaboratorsController],
         providers: [collaborators_service_1.CollaboratorsService],
         exports: [collaborators_service_1.CollaboratorsService],

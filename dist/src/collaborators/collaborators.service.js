@@ -18,15 +18,18 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const collaborator_entity_1 = require("./entities/collaborator.entity");
 const tet_config_entity_1 = require("../tet_configs/entities/tet_config.entity");
+const user_entity_1 = require("../users/entities/user.entity");
 const enums_1 = require("../helper/enums");
 const notifications_service_1 = require("../notifications/notifications.service");
 let CollaboratorsService = class CollaboratorsService {
     collaboratorRepository;
     tetConfigRepository;
+    userRepository;
     notificationsService;
-    constructor(collaboratorRepository, tetConfigRepository, notificationsService) {
+    constructor(collaboratorRepository, tetConfigRepository, userRepository, notificationsService) {
         this.collaboratorRepository = collaboratorRepository;
         this.tetConfigRepository = tetConfigRepository;
+        this.userRepository = userRepository;
         this.notificationsService = notificationsService;
     }
     async checkAccess(userId, tetConfigId) {
@@ -56,8 +59,11 @@ let CollaboratorsService = class CollaboratorsService {
     }
     async add(ownerId, createDto) {
         await this.checkOwner(ownerId, createDto.tet_config_id);
+        const invitedUser = await this.userRepository.findOne({ where: { email: createDto.user_email } });
+        if (!invitedUser)
+            throw new common_1.NotFoundException('User with that email not found');
         const existing = await this.collaboratorRepository.findOne({
-            where: { tet_config: { id: createDto.tet_config_id }, user: { email: createDto.user_email } },
+            where: { tet_config: { id: createDto.tet_config_id }, user: { id: invitedUser.id } },
         });
         if (existing)
             throw new common_1.ConflictException('User is already a collaborator');
@@ -65,11 +71,11 @@ let CollaboratorsService = class CollaboratorsService {
             role: createDto.role,
             status: enums_1.CollaboratorStatus.PENDING,
             tet_config: { id: createDto.tet_config_id },
-            user: { email: createDto.user_email },
+            user: { id: invitedUser.id },
         });
         const saved = await this.collaboratorRepository.save(collaborator);
         const tetConfig = await this.tetConfigRepository.findOne({ where: { id: createDto.tet_config_id } });
-        await this.notificationsService.createForUser(createDto.user_email, `You've been invited to collaborate on "${tetConfig.name}"`);
+        await this.notificationsService.createForUser(invitedUser.id, `You've been invited to collaborate on "${tetConfig.name}"`);
         return saved;
     }
     async accept(id, userId) {
@@ -145,7 +151,9 @@ exports.CollaboratorsService = CollaboratorsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(collaborator_entity_1.Collaborator)),
     __param(1, (0, typeorm_1.InjectRepository)(tet_config_entity_1.TetConfig)),
+    __param(2, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         notifications_service_1.NotificationsService])
 ], CollaboratorsService);

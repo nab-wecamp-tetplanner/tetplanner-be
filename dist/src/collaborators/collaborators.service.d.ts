@@ -1,14 +1,16 @@
 import { Repository } from 'typeorm';
 import { Collaborator } from './entities/collaborator.entity';
 import { TetConfig } from '../tet_configs/entities/tet_config.entity';
+import { User } from '../users/entities/user.entity';
 import { CreateCollaboratorDto } from './dto/create-collaborator.dto';
 import { CollaboratorRole } from '../helper/enums';
 import { NotificationsService } from '../notifications/notifications.service';
 export declare class CollaboratorsService {
     private readonly collaboratorRepository;
     private readonly tetConfigRepository;
+    private readonly userRepository;
     private readonly notificationsService;
-    constructor(collaboratorRepository: Repository<Collaborator>, tetConfigRepository: Repository<TetConfig>, notificationsService: NotificationsService);
+    constructor(collaboratorRepository: Repository<Collaborator>, tetConfigRepository: Repository<TetConfig>, userRepository: Repository<User>, notificationsService: NotificationsService);
     checkAccess(userId: string, tetConfigId: string): Promise<void>;
     private checkOwner;
     add(ownerId: string, createDto: CreateCollaboratorDto): Promise<Collaborator>;
