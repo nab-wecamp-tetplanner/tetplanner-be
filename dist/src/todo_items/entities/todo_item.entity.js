@@ -29,7 +29,6 @@ let TodoItem = class TodoItem {
     estimated_price;
     quantity;
     purchased;
-    assigned_to;
     subtasks;
     done_percentage;
     computeDonePercentage() {
@@ -91,10 +90,6 @@ __decorate([
     (0, typeorm_1.Column)({ default: false }),
     __metadata("design:type", Boolean)
 ], TodoItem.prototype, "purchased", void 0);
-__decorate([
-    (0, typeorm_1.Column)('uuid', { nullable: true }),
-    __metadata("design:type", String)
-], TodoItem.prototype, "assigned_to", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'jsonb', default: {} }),
     __metadata("design:type", Object)

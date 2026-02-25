@@ -40,9 +40,6 @@ export class TodoItem {
   @Column({ default: false })
   purchased: boolean;
 
-  @Column('uuid', { nullable: true })
-  assigned_to: string;
-
   @Column({ type: 'jsonb', default: {} })
   subtasks: Record<string, boolean>;
 

@@ -37,10 +37,10 @@ let TasksService = TasksService_1 = class TasksService {
                 is_overdue: false,
                 status: (0, typeorm_2.Not)(enums_1.TodoStatus.COMPLETED),
             },
-            relations: ['tet_config', 'tet_config.owner'],
+            relations: ['tet_config', 'tet_config.owner', 'assigned_to_user'],
         });
         for (const item of overdueItems) {
-            const userId = item.assigned_to ?? item.tet_config?.owner?.id;
+            const userId = item.assigned_to_user?.id ?? item.tet_config?.owner?.id;
             if (!userId)
                 continue;
             await this.todoItemRepository.update(item.id, { is_overdue: true });

@@ -16,7 +16,6 @@ export declare class TodoItem {
     estimated_price: number;
     quantity: number;
     purchased: boolean;
-    assigned_to: string;
     subtasks: Record<string, boolean>;
     done_percentage: number;
     computeDonePercentage(): void;
