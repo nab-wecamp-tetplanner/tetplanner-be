@@ -5,7 +5,9 @@ export declare class AiChatService {
     private readonly logger;
     private readonly genAI;
     private readonly modelName;
+    private readonly systemInstruction;
     constructor(configService: ConfigService);
+    private loadSystemPrompt;
     chat(dto: ChatDto): Promise<{
         reply: string;
     }>;
