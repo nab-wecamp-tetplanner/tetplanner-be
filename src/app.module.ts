@@ -20,6 +20,7 @@ import { typeOrmConfig } from '../database/data-source';
 import { AuthModule } from './auth/auth.module';
 import { SupabaseStorageService } from './supabase-storage/supabase-storage.service';
 import { SupabaseStorageModule } from './supabase-storage/supabase-storage.module';
+import { AiChatModule } from './ai_chat/ai_chat.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { SupabaseStorageModule } from './supabase-storage/supabase-storage.modul
     DashboardModule,
     AuthModule,
     SupabaseStorageModule,
+    AiChatModule,
   ],
   controllers: [AppController],
   providers: [AppService, SupabaseStorageService],

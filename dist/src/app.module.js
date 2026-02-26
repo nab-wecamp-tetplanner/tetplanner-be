@@ -65,6 +65,7 @@ const data_source_1 = require("../database/data-source");
 const auth_module_1 = require("./auth/auth.module");
 const supabase_storage_service_1 = require("./supabase-storage/supabase-storage.service");
 const supabase_storage_module_1 = require("./supabase-storage/supabase-storage.module");
+const ai_chat_module_1 = require("./ai_chat/ai_chat.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -96,6 +97,7 @@ exports.AppModule = AppModule = __decorate([
             dashboard_module_1.DashboardModule,
             auth_module_1.AuthModule,
             supabase_storage_module_1.SupabaseStorageModule,
+            ai_chat_module_1.AiChatModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, supabase_storage_service_1.SupabaseStorageService],
