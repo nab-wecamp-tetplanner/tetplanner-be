@@ -7,12 +7,13 @@ import { TetConfig } from '../tet_configs/entities/tet_config.entity';
 import { Collaborator } from '../collaborators/entities/collaborator.entity';
 import { BudgetTransaction } from '../budget_transactions/entities/budget_transaction.entity';
 import { TimelinePhase } from '../timeline_phases/entities/timeline_phase.entity';
+import { User } from '../users/entities/user.entity';
 import { CollaboratorsModule } from '../collaborators/collaborators.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { BudgetCalculationsService } from '../helper/budget-calculations.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TodoItem, TetConfig, Collaborator, BudgetTransaction, TimelinePhase]), CollaboratorsModule, NotificationsModule],
+  imports: [TypeOrmModule.forFeature([TodoItem, TetConfig, Collaborator, BudgetTransaction, TimelinePhase, User]), CollaboratorsModule, NotificationsModule],
   controllers: [TodoItemsController],
   providers: [TodoItemsService, BudgetCalculationsService],
 })

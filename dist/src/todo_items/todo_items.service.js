@@ -21,6 +21,7 @@ const tet_config_entity_1 = require("../tet_configs/entities/tet_config.entity")
 const collaborator_entity_1 = require("../collaborators/entities/collaborator.entity");
 const budget_transaction_entity_1 = require("../budget_transactions/entities/budget_transaction.entity");
 const timeline_phase_entity_1 = require("../timeline_phases/entities/timeline_phase.entity");
+const user_entity_1 = require("../users/entities/user.entity");
 const collaborators_service_1 = require("../collaborators/collaborators.service");
 const notifications_service_1 = require("../notifications/notifications.service");
 const budget_calculations_service_1 = require("../helper/budget-calculations.service");
@@ -31,15 +32,17 @@ let TodoItemsService = class TodoItemsService {
     collaboratorRepository;
     budgetTransactionRepository;
     timelinePhaseRepository;
+    userRepository;
     collaboratorsService;
     notificationsService;
     budgetCalculationsService;
-    constructor(todoItemRepository, tetConfigRepository, collaboratorRepository, budgetTransactionRepository, timelinePhaseRepository, collaboratorsService, notificationsService, budgetCalculationsService) {
+    constructor(todoItemRepository, tetConfigRepository, collaboratorRepository, budgetTransactionRepository, timelinePhaseRepository, userRepository, collaboratorsService, notificationsService, budgetCalculationsService) {
         this.todoItemRepository = todoItemRepository;
         this.tetConfigRepository = tetConfigRepository;
         this.collaboratorRepository = collaboratorRepository;
         this.budgetTransactionRepository = budgetTransactionRepository;
         this.timelinePhaseRepository = timelinePhaseRepository;
+        this.userRepository = userRepository;
         this.collaboratorsService = collaboratorsService;
         this.notificationsService = notificationsService;
         this.budgetCalculationsService = budgetCalculationsService;
@@ -48,6 +51,11 @@ let TodoItemsService = class TodoItemsService {
         await this.collaboratorsService.checkAccess(userId, createDto.tet_config_id);
         if (createDto.is_shopping && (!createDto.category_id || createDto.estimated_price == null)) {
             throw new common_1.BadRequestException('Shopping items require a category and an estimated price');
+        }
+        if (createDto.assigned_to) {
+            const assignee = await this.userRepository.findOne({ where: { id: createDto.assigned_to } });
+            if (!assignee)
+                throw new common_1.NotFoundException('Assigned user not found');
         }
         const item = this.todoItemRepository.create({
             ...createDto,
@@ -240,7 +248,9 @@ exports.TodoItemsService = TodoItemsService = __decorate([
     __param(2, (0, typeorm_1.InjectRepository)(collaborator_entity_1.Collaborator)),
     __param(3, (0, typeorm_1.InjectRepository)(budget_transaction_entity_1.BudgetTransaction)),
     __param(4, (0, typeorm_1.InjectRepository)(timeline_phase_entity_1.TimelinePhase)),
+    __param(5, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,

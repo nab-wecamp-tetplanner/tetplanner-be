@@ -6,6 +6,7 @@ import { TetConfig } from '../tet_configs/entities/tet_config.entity';
 import { Collaborator } from '../collaborators/entities/collaborator.entity';
 import { BudgetTransaction } from '../budget_transactions/entities/budget_transaction.entity';
 import { TimelinePhase } from '../timeline_phases/entities/timeline_phase.entity';
+import { User } from '../users/entities/user.entity';
 import { CreateTodoItemDto } from './dto/create-todo_item.dto';
 import { UpdateTodoItemDto } from './dto/update-todo_item.dto';
 import { CollaboratorsService } from '../collaborators/collaborators.service';
@@ -26,6 +27,8 @@ export class TodoItemsService {
     private readonly budgetTransactionRepository: Repository<BudgetTransaction>,
     @InjectRepository(TimelinePhase)
     private readonly timelinePhaseRepository: Repository<TimelinePhase>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly collaboratorsService: CollaboratorsService,
     private readonly notificationsService: NotificationsService,
     private readonly budgetCalculationsService: BudgetCalculationsService,
@@ -36,6 +39,11 @@ export class TodoItemsService {
 
     if (createDto.is_shopping && (!createDto.category_id || createDto.estimated_price == null)) {
       throw new BadRequestException('Shopping items require a category and an estimated price');
+    }
+
+    if (createDto.assigned_to) {
+      const assignee = await this.userRepository.findOne({ where: { id: createDto.assigned_to } });
+      if (!assignee) throw new NotFoundException('Assigned user not found');
     }
 
     const item = this.todoItemRepository.create({
