@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+
+export const SUPPORTED_CURRENCIES = ['VND', 'USD'] as const;
 
 export class CreateTetConfigDto {
   @ApiProperty({ type: Number, description: 'Year of Tet celebration' })
@@ -17,8 +19,8 @@ export class CreateTetConfigDto {
   @IsNotEmpty()
   total_budget!: number;
 
-  @ApiPropertyOptional({ type: String, description: 'Currency code (e.g. VND, USD)', default: 'VND' })
-  @IsString()
+  @ApiPropertyOptional({ enum: SUPPORTED_CURRENCIES, default: 'VND', description: 'Currency code' })
+  @IsIn(SUPPORTED_CURRENCIES)
   @IsOptional()
   currency?: string;
 }

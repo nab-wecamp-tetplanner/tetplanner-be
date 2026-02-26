@@ -50,7 +50,7 @@ __decorate([
     __metadata("design:type", Number)
 ], TetConfig.prototype, "total_budget", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true, default: 'VND' }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 3, nullable: true, default: 'VND' }),
     __metadata("design:type", String)
 ], TetConfig.prototype, "currency", void 0);
 __decorate([

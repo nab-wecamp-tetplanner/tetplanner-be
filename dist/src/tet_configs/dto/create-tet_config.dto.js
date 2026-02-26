@@ -9,9 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateTetConfigDto = void 0;
+exports.CreateTetConfigDto = exports.SUPPORTED_CURRENCIES = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+exports.SUPPORTED_CURRENCIES = ['VND', 'USD'];
 class CreateTetConfigDto {
     year;
     name;
@@ -38,8 +39,8 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateTetConfigDto.prototype, "total_budget", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ type: String, description: 'Currency code (e.g. VND, USD)', default: 'VND' }),
-    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiPropertyOptional)({ enum: exports.SUPPORTED_CURRENCIES, default: 'VND', description: 'Currency code' }),
+    (0, class_validator_1.IsIn)(exports.SUPPORTED_CURRENCIES),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateTetConfigDto.prototype, "currency", void 0);
