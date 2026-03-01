@@ -75,7 +75,7 @@ let CollaboratorsService = class CollaboratorsService {
         });
         const saved = await this.collaboratorRepository.save(collaborator);
         const tetConfig = await this.tetConfigRepository.findOne({ where: { id: createDto.tet_config_id } });
-        await this.notificationsService.createForUser(invitedUser.id, `You've been invited to collaborate on "${tetConfig.name}"`);
+        await this.notificationsService.createForUser(invitedUser.id, `You've been invited to collaborate on "${tetConfig.name}: ${tetConfig.id}"`);
         return saved;
     }
     async accept(id, userId) {
