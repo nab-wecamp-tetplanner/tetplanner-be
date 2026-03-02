@@ -37,7 +37,7 @@ export class TetConfigsService {
 
   async findAllByUser(userId: string) {
     const [owned, collabs] = await Promise.all([this.tetConfigRepository.find({ where: { owner: { id: userId } } }), this.collaboratorRepository.find({ where: { user: { id: userId }, status: CollaboratorStatus.ACCEPTED }, relations: ['tet_config'] })]);
-    const collaboratedConfigs = collabs.map((c) => c.tet_config);
+    const collaboratedConfigs = collabs.map((c) => c.tet_config).filter((tc) => tc !== null);
     const seen = new Set(owned.map((tc) => tc.id));
     return [...owned, ...collaboratedConfigs.filter((tc) => !seen.has(tc.id))];
   }
